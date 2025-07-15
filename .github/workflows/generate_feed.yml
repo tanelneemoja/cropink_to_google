@@ -2,12 +2,18 @@ name: Generate Google Ads CSV Feed
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Run every 6 hours (adjust as needed, e.g., '0 0 * * *' for daily at midnight UTC)
-  workflow_dispatch: # Allows manual triggering from GitHub UI
+    - cron: '0 */6 * * *' # Run every 6 hours
+  workflow_dispatch: # Allows manual triggering
+  push:
+    paths:
+      - 'transform_cropink_feed.py'
+      - '.github/workflows/generate_feed.yml'
 
 jobs:
   generate_csv:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # This permission is crucial for the auto-commit action
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,14 +28,19 @@ jobs:
           pip install requests pandas
 
       - name: Run transformation script
-        run: python transform_cropink_feed.py # Assuming your script is named this
+        run: python transform_cropink_feed.py
         env:
           CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
-          OUTPUT_CSV_FILE: google_ads_feed.csv
+          OUTPUT_CSV_FILE: google_ads_feed.csv # This is the file that will be committed
 
-      - name: Upload generated CSV as artifact
-        uses: actions/upload-artifact@v4
+      - name: Commit and push generated CSV
+        uses: stefanzweifel/git-auto-commit-action@v5 # Use the auto-commit action
         with:
-          name: google-ads-feed-csv
-          path: google_ads_feed.csv
-          retention-days: 7 # Keep the artifact for 7 days (adjust as needed)
+          # The files to commit. This should be the path to your generated CSV.
+          # Wildcards are supported, e.g., 'data/*.csv'
+          file_pattern: 'google_ads_feed.csv'
+          commit_message: 'Automated: Update Google Ads feed CSV'
+          # Optional: Specify author details for the commit
+          commit_author: 'GitHub Actions <action@github.com>'
+          # Optional: Use a specific branch if you don't want to commit to the default branch
+          # branch: 'main' # Or 'master' or a dedicated branch for generated files
