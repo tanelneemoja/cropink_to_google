@@ -2,7 +2,8 @@ import requests
 import xml.etree.ElementTree as ET
 import pandas as pd
 import re
-import os # Import os for environment variables if running in GitHub Actions
+import os
+import csv # Ensure csv module is imported for quoting in to_csv
 
 def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads_feed.csv"):
     """
@@ -43,7 +44,7 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
             'Item description': '',
             'Item category': '',
             'Price': '',
-            'Sale price': '',
+            'Sale price': '', # Now explicitly included for extraction
             'Contextual keywords': '',
             'Item address': '',
             'Tracking template': '',
@@ -68,8 +69,7 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
         # g:title (Required for Item title)
         g_title = item.find('g:title', namespaces=namespaces)
         if g_title is not None and g_title.text:
-            # Recommended max 25 chars. Consider truncation if necessary for display.
-            product_data['Item title'] = g_title.text.strip() # No truncation for CSV, let Google Ads handle it if it needs to.
+            product_data['Item title'] = g_title.text.strip()
 
         # g:link (Required for Final URL)
         g_link = item.find('g:link', namespaces=namespaces)
@@ -84,7 +84,6 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
         # g:description (Recommended for Item description)
         g_description = item.find('g:description', namespaces=namespaces)
         if g_description is not None and g_description.text:
-            # Recommended max 25 chars for display. No truncation for CSV.
             product_data['Item description'] = g_description.text.strip()
 
         # g:google_product_category or g:product_type (Recommended for Item category)
@@ -95,25 +94,28 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
         elif g_product_type is not None and g_product_type.text:
             product_data['Item category'] = g_product_type.text.strip()
 
+        # Helper function to parse price/sale price with currency
+        def parse_price(price_element):
+            if price_element is not None and price_element.text:
+                price_text = price_element.text.strip()
+                match = re.match(r'([\d.]+)\s*([A-Z]{3})$', price_text, re.IGNORECASE)
+                if match:
+                    price_value = match.group(1)
+                    currency_code = match.group(2).upper()
+                    return f"{price_value} {currency_code}"
+                else:
+                    # Fallback if regex doesn't match expected "NUMBER CURRENCY_CODE" format
+                    print(f"Warning: Price format '{price_text}' not exactly 'NUMBER CURRENCY_CODE'. Using raw.")
+                    return price_text
+            return ''
 
         # g:price (Recommended for Price)
         g_price = item.find('g:price', namespaces=namespaces)
-        if g_price is not None and g_price.text:
-            price_text = g_price.text.strip()
-            # Regex to capture number (with decimal) and currency code
-            # e.g., "14.00 EUR" -> "14.00", "EUR"
-            match = re.match(r'([\d.]+)\s*([A-Z]{3})$', price_text, re.IGNORECASE)
-            if match:
-                price_value = match.group(1)
-                currency_code = match.group(2).upper()
-                product_data['Price'] = f"{price_value} {currency_code}"
-            else:
-                # Fallback if regex doesn't match expected "NUMBER CURRENCY_CODE" format
-                # If it's just "14.00", we might need to assume EUR or leave as is.
-                # Given your sample "14.00 EUR", the regex should work.
-                print(f"Warning: Price format '{price_text}' not exactly 'NUMBER CURRENCY_CODE'. Using raw.")
-                product_data['Price'] = price_text # Use raw if format isn't perfect, might still work for Google Ads
+        product_data['Price'] = parse_price(g_price)
 
+        # g:sale_price (New addition for Sale price)
+        g_sale_price = item.find('g:sale_price', namespaces=namespaces)
+        product_data['Sale price'] = parse_price(g_sale_price)
 
         # Contextual keywords (mapping from multiple fields like brand, color, custom labels)
         keywords = []
@@ -125,27 +127,14 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
         if g_color is not None and g_color.text:
             keywords.append(g_color.text.strip())
 
-        # Include custom labels if relevant for keywords
-        # Note: custom_label_x elements are NOT in the 'g' namespace
-        for i in range(5):
+        for i in range(5): # Iterate custom_label_0 to custom_label_4
+            # Note: custom_label_x elements are NOT in the 'g' namespace
             custom_label = item.find(f'custom_label_{i}')
             if custom_label is not None and custom_label.text:
                 keywords.append(custom_label.text.strip())
 
         if keywords:
-            # Filter out empty strings that might result from .strip() on empty text or None
-            product_data['Contextual keywords'] = ";".join(filter(None, keywords))
-
-
-        # ID2, Item subtitle, Sale price, Item address, Tracking template, Custom parameter,
-        # Final mobile URL, Android app link, iOS app link, iOS app store ID,
-        # Formatted price, Formatted sale price are not directly available in your provided
-        # Cropink sample, or require complex logic not derivable from the sample.
-        # They are left as empty strings as per initialization.
-        # If your feed were to include <g:sale_price>, you'd add:
-        # g_sale_price = item.find('g:sale_price', namespaces=namespaces)
-        # if g_sale_price is not None and g_sale_price.text:
-        #     product_data['Sale price'] = g_sale_price.text.strip()
+            product_data['Contextual keywords'] = ";".join(filter(None, keywords)) # Filter out empty strings
 
 
         products_for_google_ads.append(product_data)
@@ -154,10 +143,9 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
     df = pd.DataFrame(products_for_google_ads)
 
     # Ensure column order matches the Google Ads template exactly
-    # This is crucial for Google Ads to correctly interpret the data, even if going via Sheets.
     google_ads_columns_order = [
         'ID', 'ID2', 'Item title', 'Final URL', 'Image URL', 'Item subtitle',
-        'Item description', 'Item category', 'Price', 'Sale price',
+        'Item description', 'Item category', 'Price', 'Sale price', # Sale price included here
         'Contextual keywords', 'Item address', 'Tracking template',
         'Custom parameter', 'Final mobile URL', 'Android app link',
         'iOS app link', 'iOS app store ID', 'Formatted price', 'Formatted sale price'
@@ -169,8 +157,6 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
     # Save to CSV
     print(f"Attempting to save transformed data to {output_csv_file}")
     try:
-        # Use sep=',' explicitly and doublequote=True to handle commas within fields
-        # and ensure proper CSV formatting for Google Sheets.
         df.to_csv(output_csv_file, index=False, encoding='utf-8', sep=',', doublequote=True, quoting=csv.QUOTE_ALL)
         print(f"Successfully transformed feed and saved to {output_csv_file}")
         return True # Indicate success
@@ -179,17 +165,8 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_file="google_ads
         return False # Indicate failure
 
 if __name__ == "__main__":
-    # In a GitHub Action, you'd define these as environment variables.
-    # For local testing, you can hardcode them or set them in your shell.
-    # Example for local testing:
-    # CROPINK_FEED_URL = "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4"
-    # OUTPUT_CSV_FILE = "google_ads_feed.csv"
-
-    # For GitHub Actions, retrieve from environment variables
     cropink_feed_url = os.environ.get('CROPINK_FEED_URL', "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4")
     output_csv_file = os.environ.get('OUTPUT_CSV_FILE', "google_ads_feed.csv")
-
-    import csv # Import csv module needed for quoting in to_csv
 
     success = transform_cropink_to_google_ads_csv(cropink_feed_url, output_csv_file)
     if success:
