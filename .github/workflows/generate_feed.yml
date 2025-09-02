@@ -31,16 +31,12 @@ jobs:
         run: python transform_cropink_feed.py
         env:
           CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
-          OUTPUT_CSV_FILE: google_ads_feed.csv # This is the file that will be committed
 
-      - name: Commit and push generated CSV
-        uses: stefanzweifel/git-auto-commit-action@v5 # Use the auto-commit action
+      - name: Commit and push generated CSVs
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          # The files to commit. This should be the path to your generated CSV.
-          # Wildcards are supported, e.g., 'data/*.csv'
-          file_pattern: 'google_ads_feed.csv'
-          commit_message: 'Automated: Update Google Ads feed CSV'
+          # Use a wildcard pattern to match both generated files.
+          file_pattern: 'google_ads_feed_*.csv'
+          commit_message: 'Automated: Update Google Ads feed CSVs'
           # Optional: Specify author details for the commit
           commit_author: 'GitHub Actions <action@github.com>'
-          # Optional: Use a specific branch if you don't want to commit to the default branch
-          # branch: 'main' # Or 'master' or a dedicated branch for generated files
