@@ -9,7 +9,7 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_base="google_ads
     """
     Fetches the Cropink XML feed, transforms it into Google Ads Business Data
     compatible CSVs for 'Basketball' and 'Lifestyle' categories, and saves them
-    to separate files.
+    to separate files .
     """
     print(f"Attempting to fetch Cropink feed from: {cropink_url}")
     try:
