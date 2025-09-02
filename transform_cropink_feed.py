@@ -132,7 +132,7 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_base="google_ads
         'Custom parameter', 'Final mobile URL', 'Android app link',
         'iOS app link', 'iOS app store ID', 'Formatted price', 'Formatted sale price'
     ]
-
+ 
     success = True
     for category, product_list in products_for_google_ads.items():
         if product_list:
