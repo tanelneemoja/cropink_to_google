@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import os
 import csv
-
+ 
 def transform_cropink_to_google_ads_csv(cropink_url, output_csv_base="google_ads_feed"):
     """
     Fetches the Cropink XML feed, transforms it into Google Ads Business Data
