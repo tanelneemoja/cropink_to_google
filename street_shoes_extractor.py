@@ -73,8 +73,8 @@ def extract_street_shoes_list(xml_content):
     unique_product_list = set()
     matched_count = 0
     
-    # Define prefixes to strip from titles to reduce duplicates (case-insensitive)
-    GENDER_PREFIXES = [
+    # Define prefixes/suffixes to strip from titles to reduce duplicates (case-insensitive)
+    GENDER_STRIPPERS = [
         r'\bw\b',        # 'w ' (e.g., nike w air max)
         r'\bwmns\b',     # 'wmns ' (e.g., jordan wmns air force 1)
         r"women's\b",
@@ -82,9 +82,8 @@ def extract_street_shoes_list(xml_content):
         r"gs\b",         # Grade School / Youth sizing often appears as a redundant suffix
     ]
     # Compile a regex pattern to efficiently check and replace these prefixes/suffixes
-    # Using \b to ensure whole word match (e.g., 'w' but not 'low')
-    GENDER_PREFIX_PATTERN = re.compile(r'^\s*(' + '|'.join(GENDER_PREFIXES) + r')\s*', re.IGNORECASE)
-    GENDER_SUFFIX_PATTERN = re.compile(r'\s+(' + '|'.join(GENDER_PREFIXES) + r')\s*$', re.IGNORECASE)
+    GENDER_PREFIX_PATTERN = re.compile(r'^\s*(' + '|'.join(GENDER_STRIPPERS) + r')\s*', re.IGNORECASE)
+    GENDER_SUFFIX_PATTERN = re.compile(r'\s+(' + '|'.join(GENDER_STRIPPERS) + r')\s*$', re.IGNORECASE)
 
 
     for item in items:
@@ -128,24 +127,30 @@ def extract_street_shoes_list(xml_content):
             final_title = GENDER_PREFIX_PATTERN.sub('', clean_title)
             final_title = GENDER_SUFFIX_PATTERN.sub('', final_title).strip()
             
+            # Re-clean to remove any double spaces left by stripping
+            final_title = ' '.join(final_title.split())
             
-            # D. Brand Redundancy Check (e.g., 'jordan air jordan 1 low')
+            
+            # D. Brand Redundancy Check 
             
             # 1. Check for standard redundant brand prefix (e.g., 'nike nike air max')
             brand_prefix = normalized_brand + ' '
             if final_title.startswith(brand_prefix):
                 final_title = final_title[len(brand_prefix):].strip()
-                
-            # 2. Check for the specific "Jordan Air Jordan" pattern after cleaning
-            if normalized_brand == 'jordan' and final_title.startswith('air jordan'):
-                # Title should remain 'air jordan 1 low'
-                pass
             
-            # Final clean up in case redundancy removal left a space
+            # 2. Re-clean to remove any double spaces left by stripping
             final_title = ' '.join(final_title.split())
 
             # --- 4. Final Output ---
-            output_string = f"{normalized_brand} {final_title}"
+            
+            # NEW LOGIC: If brand is 'jordan' and 'air jordan' is in the title, 
+            # use only the title as the final output string to avoid redundancy.
+            if normalized_brand == 'jordan' and 'air jordan' in final_title:
+                output_string = final_title
+            else:
+                # For all other products, use the standard Brand + Title format.
+                output_string = f"{normalized_brand} {final_title}"
+            
             unique_product_list.add(output_string)
 
         elif is_street_shoe and has_data:
@@ -180,7 +185,6 @@ if __name__ == "__main__":
 
     xml_data = fetch_xml_data(XML_FEED_URL)
     
-    # FIX: Changed 'xml_content' to the correct variable 'xml_data'
     if xml_data:
         extracted_products = extract_street_shoes_list(xml_data)
         if extracted_products:
