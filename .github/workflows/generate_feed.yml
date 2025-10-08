@@ -1,54 +1,54 @@
 name: Generate Google Ads CSV Feed
 
 on:
-schedule:
-- cron: '0 */6 * * *' # Run every 6 hours
-workflow_dispatch: # Allows manual triggering
-push:
-paths:
-- 'transform_cropink_feed.py'
-- 'street_shoes_extractor.py' # <-- Added the new script file path
-- '.github/workflows/generate_feed.yml'
+  schedule:
+    - cron: '0 */6 * * *' # Run every 6 hours
+  workflow_dispatch: # Allows manual triggering
+  push:
+    paths:
+      - 'transform_cropink_feed.py'
+      - 'street_shoes_extractor.py' # Includes the new script
+      - '.github/workflows/generate_feed.yml'
 
 jobs:
-generate_csv:
-runs-on: ubuntu-latest
-permissions:
-contents: write # This permission is crucial for the auto-commit action
-steps:
-- name: Checkout repository
-uses: actions/checkout@v4
+  generate_csv:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # This permission is crucial for the auto-commit action
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Set up Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-  - name: Install dependencies
-    run: |
-      # The new script needs 'requests', which is already here.
-      pip install requests pandas
+      - name: Install dependencies
+        run: |
+          # The new script needs 'requests', which is already here.
+          pip install requests pandas
 
-  # 1. Run the original transformation script (CSV generation)
-  - name: Run Primary Transformation Script (CSV)
-    run: python transform_cropink_feed.py
-    env:
-      # This variable is used by your original script
-      CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
+      # 1. Run the original transformation script (CSV generation)
+      - name: Run Primary Transformation Script (CSV)
+        run: python transform_cropink_feed.py
+        env:
+          # This variable is used by your original script
+          CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
 
-  # 2. Run the new Street Shoes extractor script (TXT generation)
-  - name: Run Street Shoes Product Extractor (TXT)
-    run: python street_shoes_extractor.py
-    env:
-      # This variable matches the 'FEED_URL' name expected by the new Python script
-      FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
+      # 2. Run the new Street Shoes extractor script (TXT generation)
+      - name: Run Street Shoes Product Extractor (TXT)
+        run: python street_shoes_extractor.py
+        env:
+          # This variable matches the 'FEED_URL' name expected by the new Python script
+          FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
 
-  # 3. Commit both the CSV and the new TXT file
-  - name: Commit and push generated files
-    uses: stefanzweifel/git-auto-commit-action@v5
-    with:
-      # Updated file_pattern to include the new text file
-      file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt'
-      commit_message: 'Automated: Update feeds (CSV and Street Shoes list)'
-      # Optional: Specify author details for the commit
-      commit_author: 'GitHub Actions <action@github.com>'
+      # 3. Commit both the CSV and the new TXT file
+      - name: Commit and push generated files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          # Updated file_pattern to include the new text file
+          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt'
+          commit_message: 'Automated: Update feeds (CSV and Street Shoes list)'
+          # Optional: Specify author details for the commit
+          commit_author: 'GitHub Actions <action@github.com>'
