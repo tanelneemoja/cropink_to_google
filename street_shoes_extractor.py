@@ -1,7 +1,7 @@
 import requests
 import xml.etree.ElementTree as ET
 import os
-import re # <-- Added to handle dynamic namespace extraction
+import re
 
 # --- Configuration ---
 # FIX: Hardcoded the URL to bypass environment variable errors as requested.
@@ -74,32 +74,63 @@ def extract_street_shoes_list(xml_content):
     matched_count = 0
     
     for item in items:
-        # Attributes should still use the 'g:' namespace
+        # 1. Get required elements (Category, Title, Brand, Lifestyle)
         category_element = item.find('g:google_product_category', NAMESPACES)
+        lifestyle_element = item.find('custom_label_0', NAMESPACES)
+        brand_element = item.find('custom_label_3', NAMESPACES)
+        title_element = item.find('g:title', NAMESPACES)
         
-        if category_element is not None and category_element.text and TARGET_CATEGORY_PART in category_element.text:
+        # Helper to safely retrieve text, accounting for None and CDATA
+        get_text = lambda elem: (elem.text or "").strip() if elem is not None else ""
+
+        raw_category = get_text(category_element)
+        raw_lifestyle = get_text(lifestyle_element)
+        raw_brand = get_text(brand_element)
+        raw_title = get_text(title_element)
+        
+        # 2. Apply Filtering Conditions
+        # A. Must contain "Street Shoes" in category
+        # B. Must be exactly "Lifestyle" in custom_label_0 (case insensitive)
+        is_street_shoe = TARGET_CATEGORY_PART in raw_category
+        is_lifestyle = raw_lifestyle.lower() == "lifestyle"
+        has_data = bool(raw_title) and bool(raw_brand)
+        
+        if is_street_shoe and is_lifestyle and has_data:
             
             matched_count += 1
             
-            title_element = item.find('g:title', NAMESPACES)
-            brand_element = item.find('custom_label_3', NAMESPACES)
-
-            title = title_element.text if title_element is not None else None
-            brand = brand_element.text if brand_element is not None else None
+            # --- 3. Normalization and Deduplication ---
             
-            if title is None or brand is None:
-                # Log if required data is missing, but skip product
-                print(f"WARNING: Skipping item {matched_count}. Title ({title}) or Brand ({brand}) is missing.")
-                continue
+            # A. Brand Normalization: 'adidas originals' -> 'adidas'
+            normalized_brand = raw_brand.lower()
+            if normalized_brand == "adidas originals":
+                normalized_brand = "adidas"
                 
-            # Format and Clean Output 
-            clean_title = ' '.join(title.strip().lower().split())
-            clean_brand = ' '.join(brand.strip().lower().split())
+            # B. Title Cleaning (lowercase, single spaces)
+            clean_title = ' '.join(raw_title.lower().split())
             
-            output_string = f"{clean_brand} {clean_title}"
+            # C. Deduplication Check: Check if the cleaned title starts with the normalized brand
+            #    e.g., if brand='jordan' and title='jordan heir series'
+            
+            # Create a string pattern (e.g., "adidas ")
+            brand_prefix = normalized_brand + ' '
+            
+            if clean_title.startswith(brand_prefix):
+                # Remove the redundant brand prefix from the title
+                final_title = clean_title[len(brand_prefix):].strip()
+            else:
+                final_title = clean_title
+                
+            # --- 4. Final Output ---
+            output_string = f"{normalized_brand} {final_title}"
             unique_product_list.add(output_string)
 
-    print(f"DEBUG: Finished processing. Total items matched by category: {matched_count}.")
+        elif is_street_shoe and has_data:
+             # This block logs items that meet the old criteria but fail the new 'Lifestyle' filter
+             print(f"DEBUG: Skipping item {matched_count}. Passed 'Street Shoes' but failed 'Lifestyle' filter (c_l_0: '{raw_lifestyle}').")
+
+
+    print(f"DEBUG: Finished processing. Total items matched by category and lifestyle: {matched_count}.")
     print(f"DEBUG: Final unique products extracted: {len(unique_product_list)}")
     
     return sorted(list(unique_product_list))
