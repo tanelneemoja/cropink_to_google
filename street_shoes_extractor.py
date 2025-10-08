@@ -4,8 +4,8 @@ import os
 import re # <-- Added to handle dynamic namespace extraction
 
 # --- Configuration ---
-# FIX: Corrected variable name lookup to match the YAML file's environment variable
-XML_FEED_URL = os.environ.get("CROPINK_FEED_URL") 
+# FIX: Hardcoded the URL to bypass environment variable errors as requested.
+XML_FEED_URL = "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4"
 OUTPUT_FILENAME = "street_shoes_product_names.txt"
 TARGET_CATEGORY_PART = "Street Shoes"
 
@@ -15,11 +15,7 @@ ET.register_namespace('g', NAMESPACES['g'])
 
 def fetch_xml_data(url):
     """Fetches the XML data from the given URL and prints debug info."""
-    # Updated error message logic for clarity
-    if not url:
-        print("FATAL ERROR: The CROPINK_FEED_URL environment variable was not correctly provided.")
-        return None
-        
+    # The URL check is removed since the URL is hardcoded.
     print(f"DEBUG: Attempting to fetch XML feed from: {url}")
     try:
         response = requests.get(url, timeout=45) 
