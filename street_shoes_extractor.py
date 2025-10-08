@@ -137,10 +137,6 @@ def extract_street_shoes_list(xml_content):
                 final_title = final_title[len(brand_prefix):].strip()
                 
             # 2. Check for the specific "Jordan Air Jordan" pattern after cleaning
-            # If the normalized brand is 'jordan' AND the title starts with 'air jordan',
-            # then the redundancy is handled by the first step above if the raw title was "jordan air jordan...".
-            # However, if the redundancy check was insufficient (e.g., raw_title was "Jordan W Air Jordan..."),
-            # we re-check for the specific redundant pattern "jordan air jordan" in case the raw title was missed.
             if normalized_brand == 'jordan' and final_title.startswith('air jordan'):
                 # Title should remain 'air jordan 1 low'
                 pass
@@ -184,7 +180,8 @@ if __name__ == "__main__":
 
     xml_data = fetch_xml_data(XML_FEED_URL)
     
-    if xml_content:
+    # FIX: Changed 'xml_content' to the correct variable 'xml_data'
+    if xml_data:
         extracted_products = extract_street_shoes_list(xml_data)
         if extracted_products:
             write_product_list(extracted_products, OUTPUT_FILENAME)
