@@ -24,7 +24,6 @@ adidas handball spezial
 adidas hyperturf
 adidas jabbar hi
 adidas jabbar lo
-adidas london
 adidas megaride
 adidas montreal rm
 adidas muenchen
@@ -36,7 +35,6 @@ adidas nmd_r1 primeblue
 adidas nmd_v3
 adidas ozelia
 adidas ozmillen
-adidas ozmorph
 adidas oztral
 adidas ozweego
 adidas performance ultraboost dna
@@ -59,6 +57,7 @@ adidas taekwondo lace
 adidas terrex free hiker 2 gtx
 adidas tokyo
 air jordan 1 brooklyn low
+air jordan 1 elevate low
 air jordan 1 low
 air jordan 1 low prm
 air jordan 1 low se
@@ -87,6 +86,7 @@ asics gel-kayano 14
 asics gel-nunobiki
 asics gel-nyc
 asics gel-nyc rgd
+asics gel-quantum 180
 asics gel-quantum 360 vii
 asics gel-venture 6 shield
 asics gt-2160
@@ -117,6 +117,7 @@ birkenstock zermatt premium shearling leve mink laf
 carhartt wip slippers
 champion low cut shoe z80 desert ash low
 converse as-1 pro ox
+converse as-1 pro ox cliffside
 converse chuck 70 2-in-1
 converse chuck 70 cdg
 converse chuck 70 cdg hi
@@ -130,6 +131,7 @@ converse chuck 70 ox
 converse chuck 70 plus hi egret/black/egret
 converse chuck 70 plus x-hi
 converse chuck 70 wide ox
+converse cl98 ox
 converse ctas cruise ox
 converse ctas eva lift ox
 converse ctas lift hi
@@ -161,6 +163,7 @@ jordan 1 low
 jordan 1 retro high og ps
 jordan 1 retro high og td
 jordan 23/7 td
+jordan 23_7.2 easyon ps
 jordan 23_7.2 easyon td
 jordan 4 retro og ps
 jordan 4 retro og td
@@ -168,10 +171,12 @@ jordan 6 rings
 jordan cmft era
 jordan day1 e.o.
 jordan flare ps
+jordan flare td
 jordan flight court
 jordan heir series
 jordan hydrip
 jordan hydrip ps
+jordan hydrip td
 jordan jumpman two trey
 jordan max aura 5
 jordan max aura 5 (gs)
@@ -272,6 +277,7 @@ nike air max portal se
 nike air max sndr
 nike air max tl 2.5
 nike air more uptempo low
+nike air more uptempo ´96
 nike blazer roam mid
 nike c1ty
 nike c1ty prm
