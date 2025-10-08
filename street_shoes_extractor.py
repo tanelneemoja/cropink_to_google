@@ -4,6 +4,7 @@ import os
 import re # <-- Added to handle dynamic namespace extraction
 
 # --- Configuration ---
+# FIX: Corrected variable name lookup to match the YAML file's environment variable
 XML_FEED_URL = os.environ.get("CROPINK_FEED_URL") 
 OUTPUT_FILENAME = "street_shoes_product_names.txt"
 TARGET_CATEGORY_PART = "Street Shoes"
@@ -14,8 +15,9 @@ ET.register_namespace('g', NAMESPACES['g'])
 
 def fetch_xml_data(url):
     """Fetches the XML data from the given URL and prints debug info."""
-    if not url or "FALLBACK_URL" in url:
-        print("FATAL ERROR: FEED_URL environment variable is missing or invalid.")
+    # Updated error message logic for clarity
+    if not url:
+        print("FATAL ERROR: The CROPINK_FEED_URL environment variable was not correctly provided.")
         return None
         
     print(f"DEBUG: Attempting to fetch XML feed from: {url}")
@@ -41,16 +43,11 @@ def extract_street_shoes_list(xml_content):
         return []
 
     # --- Namespace Discovery for Product Items (RSS/Atom) ---
-    # ET uses qualified names (e.g., {http://example.com/ns}item) for namespaced elements.
-    # We try to extract the default namespace from the root tag.
-    
-    product_tag_name = 'item' # Default if no namespace is found
+    product_tag_name = 'item' 
     namespace_match = re.match(r'\{(.+)\}', root.tag)
     
     if namespace_match:
         default_namespace = namespace_match.group(1)
-        # If the root has a namespace, the children items usually share it.
-        # Check for both standard RSS 'item' and Atom 'entry'.
         qualified_item = f"{{{default_namespace}}}item"
         qualified_entry = f"{{{default_namespace}}}entry"
         
@@ -125,14 +122,10 @@ def write_product_list(data_list, filename):
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    # Check if 'requests' needs to be installed (handled by YAML, but good practice)
     if 'requests' not in os.environ.get('PIP_PACKAGES', ''):
         try:
-            # We don't rely on this being runnable locally without setup, 
-            # but we ensure the necessary import is at the top.
             pass 
         except ImportError:
-            # This block is ignored in the context of the GitHub Action runner
             pass 
 
     xml_data = fetch_xml_data(XML_FEED_URL)
