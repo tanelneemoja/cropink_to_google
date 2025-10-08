@@ -90,8 +90,8 @@ def extract_street_shoes_list(xml_content):
     for item in items:
         # 1. Get required elements (Category, Title, Brand, Lifestyle)
         category_element = item.find('g:google_product_category', NAMESPACES)
-        lifestyle_element = item.find('g:custom_label_0', NAMESPACES)
-        brand_element = item.find('g:custom_label_3', NAMESPACES)
+        lifestyle_element = item.find('custom_label_0', NAMESPACES)
+        brand_element = item.find('custom_label_3', NAMESPACES)
         title_element = item.find('g:title', NAMESPACES)
         
         # Helper to safely retrieve text, accounting for None and CDATA
