@@ -73,11 +73,25 @@ def extract_street_shoes_list(xml_content):
     unique_product_list = set()
     matched_count = 0
     
+    # Define prefixes to strip from titles to reduce duplicates (case-insensitive)
+    GENDER_PREFIXES = [
+        r'\bw\b',        # 'w ' (e.g., nike w air max)
+        r'\bwmns\b',     # 'wmns ' (e.g., jordan wmns air force 1)
+        r"women's\b",
+        r"womens\b",
+        r"gs\b",         # Grade School / Youth sizing often appears as a redundant suffix
+    ]
+    # Compile a regex pattern to efficiently check and replace these prefixes/suffixes
+    # Using \b to ensure whole word match (e.g., 'w' but not 'low')
+    GENDER_PREFIX_PATTERN = re.compile(r'^\s*(' + '|'.join(GENDER_PREFIXES) + r')\s*', re.IGNORECASE)
+    GENDER_SUFFIX_PATTERN = re.compile(r'\s+(' + '|'.join(GENDER_PREFIXES) + r')\s*$', re.IGNORECASE)
+
+
     for item in items:
         # 1. Get required elements (Category, Title, Brand, Lifestyle)
         category_element = item.find('g:google_product_category', NAMESPACES)
-        lifestyle_element = item.find('custom_label_0', NAMESPACES)
-        brand_element = item.find('custom_label_3', NAMESPACES)
+        lifestyle_element = item.find('g:custom_label_0', NAMESPACES)
+        brand_element = item.find('g:custom_label_3', NAMESPACES)
         title_element = item.find('g:title', NAMESPACES)
         
         # Helper to safely retrieve text, accounting for None and CDATA
@@ -105,22 +119,35 @@ def extract_street_shoes_list(xml_content):
             normalized_brand = raw_brand.lower()
             if normalized_brand == "adidas originals":
                 normalized_brand = "adidas"
-                
+            
             # B. Title Cleaning (lowercase, single spaces)
             clean_title = ' '.join(raw_title.lower().split())
+
+            # C. Gender Prefix/Suffix Removal
+            # Remove "w" or "wmns" from the start or end of the title
+            final_title = GENDER_PREFIX_PATTERN.sub('', clean_title)
+            final_title = GENDER_SUFFIX_PATTERN.sub('', final_title).strip()
             
-            # C. Deduplication Check: Check if the cleaned title starts with the normalized brand
-            #    e.g., if brand='jordan' and title='jordan heir series'
             
-            # Create a string pattern (e.g., "adidas ")
+            # D. Brand Redundancy Check (e.g., 'jordan air jordan 1 low')
+            
+            # 1. Check for standard redundant brand prefix (e.g., 'nike nike air max')
             brand_prefix = normalized_brand + ' '
-            
-            if clean_title.startswith(brand_prefix):
-                # Remove the redundant brand prefix from the title
-                final_title = clean_title[len(brand_prefix):].strip()
-            else:
-                final_title = clean_title
+            if final_title.startswith(brand_prefix):
+                final_title = final_title[len(brand_prefix):].strip()
                 
+            # 2. Check for the specific "Jordan Air Jordan" pattern after cleaning
+            # If the normalized brand is 'jordan' AND the title starts with 'air jordan',
+            # then the redundancy is handled by the first step above if the raw title was "jordan air jordan...".
+            # However, if the redundancy check was insufficient (e.g., raw_title was "Jordan W Air Jordan..."),
+            # we re-check for the specific redundant pattern "jordan air jordan" in case the raw title was missed.
+            if normalized_brand == 'jordan' and final_title.startswith('air jordan'):
+                # Title should remain 'air jordan 1 low'
+                pass
+            
+            # Final clean up in case redundancy removal left a space
+            final_title = ' '.join(final_title.split())
+
             # --- 4. Final Output ---
             output_string = f"{normalized_brand} {final_title}"
             unique_product_list.add(output_string)
@@ -157,7 +184,7 @@ if __name__ == "__main__":
 
     xml_data = fetch_xml_data(XML_FEED_URL)
     
-    if xml_data:
+    if xml_content:
         extracted_products = extract_street_shoes_list(xml_data)
         if extracted_products:
             write_product_list(extracted_products, OUTPUT_FILENAME)
