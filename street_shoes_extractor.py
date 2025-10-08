@@ -82,7 +82,7 @@ def extract_street_shoes_list(xml_content):
             matched_count += 1
             
             title_element = item.find('g:title', NAMESPACES)
-            brand_element = item.find('g:custom_label_3', NAMESPACES)
+            brand_element = item.find('custom_label_3', NAMESPACES)
 
             title = title_element.text if title_element is not None else None
             brand = brand_element.text if brand_element is not None else None
