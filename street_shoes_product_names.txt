@@ -130,6 +130,7 @@ converse chuck 70 national ox branch out
 converse chuck 70 ox
 converse chuck 70 plus hi egret/black/egret
 converse chuck 70 plus x-hi
+converse chuck 70 rugged hi
 converse chuck 70 wide ox
 converse cl98 ox
 converse ctas cruise ox
@@ -218,7 +219,6 @@ new balance 8040
 new balance 9060
 new balance 9060 kids hook &amp; loop
 new balance 9060 kids lace
-new balance 9060 kids toggle closure
 new balance 997
 new balance abzorb 2010
 new balance ct500
@@ -241,7 +241,6 @@ nike air force 1 le
 nike air force 1 lo
 nike air force 1 low
 nike air force 1 low retro
-nike air force 1 luxe
 nike air force 1 lv8 3
 nike air force 1 mid ´07
 nike air force 1 prm mf
@@ -258,7 +257,6 @@ nike air humara qs
 nike air jordan 3 retro
 nike air max 1
 nike air max 1 ess
-nike air max 1 ess prm
 nike air max 1 prm
 nike air max 1 ´87 t
 nike air max 90
@@ -394,11 +392,12 @@ vans era 95 dx
 vans hylane
 vans knu skool
 vans lx authentic 44
+vans lx half cab reissue 33
+vans lx mule style 17
 vans lx old skool
 vans lx old skool 36
 vans lx sk8-hi reissue 38
 vans lx sk8-mid reissue 83
-vans mn kyle walker
 vans mn skate sk8-hi
 vans mte sk8-hi waterproof
 vans old skool
