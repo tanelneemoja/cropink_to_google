@@ -30,7 +30,6 @@ adidas montreal rm
 adidas muenchen
 adidas niteball
 adidas nizza platform mid
-adidas nmd_g1
 adidas nmd_r1
 adidas nmd_r1 primeblue
 adidas nmd_v3
@@ -243,7 +242,6 @@ nike air force 1 flyknit 2.0
 nike air force 1 gtx
 nike air force 1 le
 nike air force 1 lo
-nike air force 1 low
 nike air force 1 low retro
 nike air force 1 lv8 3
 nike air force 1 mid ´07
