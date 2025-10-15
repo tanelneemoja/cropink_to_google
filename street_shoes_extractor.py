@@ -171,7 +171,7 @@ def extract_street_shoes_list(xml_content):
     for product_string in sorted_product_strings:
         link = unique_product_data[product_string]
         # CHANGE HERE: Print the combined string
-        combined_output = f"{product_string} {link}"
+        combined_output = f" {link}"
         print(combined_output)
         
         # Keep only the product name for the file writing function
