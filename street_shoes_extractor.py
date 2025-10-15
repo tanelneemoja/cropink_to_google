@@ -27,7 +27,7 @@ def fetch_xml_data(url):
         return None
 
 def extract_street_shoes_list(xml_content):
-    """Parses XML and extracts brand and title for products matching the category."""
+    """Parses XML and extracts brand, title, and G:LINK for products matching the category."""
     if not xml_content:
         return []
 
@@ -70,16 +70,17 @@ def extract_street_shoes_list(xml_content):
         
     print(f"DEBUG: Found {len(items)} product items to process.")
     
-    unique_product_list = set()
+    # Stores {product_string: raw_link}
+    unique_product_data = {} 
     matched_count = 0
     
     # Define prefixes/suffixes to strip from titles to reduce duplicates (case-insensitive)
     GENDER_STRIPPERS = [
-        r'\bw\b',        # 'w ' (e.g., nike w air max)
-        r'\bwmns\b',     # 'wmns ' (e.g., jordan wmns air force 1)
+        r'\bw\b',       # 'w ' (e.g., nike w air max)
+        r'\bwmns\b',    # 'wmns ' (e.g., jordan wmns air force 1)
         r"women's\b",
         r"womens\b",
-        r"gs\b",         # Grade School / Youth sizing often appears as a redundant suffix
+        r"gs\b",        # Grade School / Youth sizing often appears as a redundant suffix
     ]
     # Compile a regex pattern to efficiently check and replace these prefixes/suffixes
     GENDER_PREFIX_PATTERN = re.compile(r'^\s*(' + '|'.join(GENDER_STRIPPERS) + r')\s*', re.IGNORECASE)
@@ -87,11 +88,13 @@ def extract_street_shoes_list(xml_content):
 
 
     for item in items:
-        # 1. Get required elements (Category, Title, Brand, Lifestyle)
+        # 1. Get required elements (Category, Title, Brand, Lifestyle, and Link)
         category_element = item.find('g:google_product_category', NAMESPACES)
         lifestyle_element = item.find('custom_label_0', NAMESPACES)
         brand_element = item.find('custom_label_3', NAMESPACES)
         title_element = item.find('g:title', NAMESPACES)
+        # Note: g:link is used here, assuming the feed structure is consistent
+        link_element = item.find('g:link', NAMESPACES) 
         
         # Helper to safely retrieve text, accounting for None and CDATA
         get_text = lambda elem: (elem.text or "").strip() if elem is not None else ""
@@ -100,13 +103,14 @@ def extract_street_shoes_list(xml_content):
         raw_lifestyle = get_text(lifestyle_element)
         raw_brand = get_text(brand_element)
         raw_title = get_text(title_element)
+        raw_link = get_text(link_element) 
         
         # 2. Apply Filtering Conditions
         # A. Must contain "Street Shoes" in category
         # B. Must be exactly "Lifestyle" in custom_label_0 (case insensitive)
         is_street_shoe = TARGET_CATEGORY_PART in raw_category
         is_lifestyle = raw_lifestyle.lower() == "lifestyle"
-        has_data = bool(raw_title) and bool(raw_brand)
+        has_data = bool(raw_title) and bool(raw_brand) and bool(raw_link) 
         
         if is_street_shoe and is_lifestyle and has_data:
             
@@ -123,7 +127,6 @@ def extract_street_shoes_list(xml_content):
             clean_title = ' '.join(raw_title.lower().split())
 
             # C. Gender Prefix/Suffix Removal
-            # Remove "w" or "wmns" from the start or end of the title
             final_title = GENDER_PREFIX_PATTERN.sub('', clean_title)
             final_title = GENDER_SUFFIX_PATTERN.sub('', final_title).strip()
             
@@ -141,31 +144,49 @@ def extract_street_shoes_list(xml_content):
             # 2. Re-clean to remove any double spaces left by stripping
             final_title = ' '.join(final_title.split())
 
-            # --- 4. Final Output ---
+            # --- 4. Final Output String Creation ---
             
-            # NEW LOGIC: If brand is 'jordan' and 'air jordan' is in the title, 
-            # use only the title as the final output string to avoid redundancy.
             if normalized_brand == 'jordan' and 'air jordan' in final_title:
                 output_string = final_title
             else:
-                # For all other products, use the standard Brand + Title format.
                 output_string = f"{normalized_brand} {final_title}"
             
-            unique_product_list.add(output_string)
+            # Use the final product string as the key to enforce uniqueness, storing the link
+            unique_product_data[output_string] = raw_link
 
         elif is_street_shoe and has_data:
              # This block logs items that meet the old criteria but fail the new 'Lifestyle' filter
-             print(f"DEBUG: Skipping item {matched_count}. Passed 'Street Shoes' but failed 'Lifestyle' filter (c_l_0: '{raw_lifestyle}').")
+             pass 
 
-
-    print(f"DEBUG: Finished processing. Total items matched by category and lifestyle: {matched_count}.")
-    print(f"DEBUG: Final unique products extracted: {len(unique_product_list)}")
+    # Print the links in the requested "product [space] link" format
+    print("\n=======================================================")
+    print("Webpage Links for Filtered Street Shoes Products:")
+    print("(Product Name [space] Link)")
+    print("=======================================================")
     
-    return sorted(list(unique_product_list))
+    # Sort and prepare the final results list
+    sorted_product_strings = sorted(unique_product_data.keys())
+    final_output_list = []
+    
+    for product_string in sorted_product_strings:
+        link = unique_product_data[product_string]
+        # CHANGE HERE: Print the combined string
+        combined_output = f"{product_string} {link}"
+        print(combined_output)
+        
+        # Keep only the product name for the file writing function
+        final_output_list.append(product_string)
+
+
+    print(f"\nDEBUG: Finished processing. Total items matched by category and lifestyle: {matched_count}.")
+    print(f"DEBUG: Final unique products extracted: {len(unique_product_data)}")
+    
+    # Return the product names for the file writing function
+    return final_output_list
 
 def write_product_list(data_list, filename):
     """Writes the list of unique products to the specified file."""
-    print(f"Writing {len(data_list)} unique product names to {filename}...")
+    print(f"\nWriting {len(data_list)} unique product names to {filename}...")
     
     try:
         with open(filename, 'w', encoding='utf-8') as f:
@@ -177,12 +198,6 @@ def write_product_list(data_list, filename):
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    if 'requests' not in os.environ.get('PIP_PACKAGES', ''):
-        try:
-            pass 
-        except ImportError:
-            pass 
-
     xml_data = fetch_xml_data(XML_FEED_URL)
     
     if xml_data:
