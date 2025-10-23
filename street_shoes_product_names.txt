@@ -46,7 +46,6 @@ adidas samba xlg
 adidas sambae
 adidas sl 72 og
 adidas sl 72 rs
-adidas stan smith cs
 adidas stan smith millencon
 adidas superstar
 adidas superstar bonega
@@ -109,6 +108,7 @@ birkenstock arizona sb eva light rose
 birkenstock arizona sfb bf black
 birkenstock arizona sfb bf dark brown
 birkenstock arizona sfb leoi
+birkenstock arizona sfb leoi habana
 birkenstock arizona sfb leve dark tea tonal fb
 birkenstock arizona soft footbed waxy leather
 birkenstock arizona suede leather
@@ -149,7 +149,6 @@ converse fastbreak pro mid into the void
 converse one star academy pro ox
 converse one star pro ox
 converse run star trainer ox
-converse turbodrk hi
 converse wave trainer
 converse weapon ox
 dr. martens adrian
@@ -258,7 +257,6 @@ nike air humara qs
 nike air jordan 3 retro
 nike air max 1
 nike air max 1 ess
-nike air max 1 ess prm
 nike air max 1 ´87 t
 nike air max 90
 nike air max 90 prm
@@ -272,6 +270,7 @@ nike air max dn se
 nike air max dn wtr
 nike air max dn8
 nike air max dn8 prm
+nike air max dn8 se
 nike air max portal
 nike air max portal se
 nike air max sndr
@@ -363,6 +362,7 @@ puma suede xl 2 carrots
 puma suede xl carrots
 puma suede xl future
 puma suede xl sk8te wrld
+puma suede xl sunbathers wns
 puma suede xl wild instinct
 puma velophasis
 puma velophasis 372.5
@@ -408,8 +408,10 @@ vans old skool insulated
 vans old skool vr3
 vans rowley classic
 vans sk8-hi flame
+vans skate 2 wayvee
 vans skate curren
 vans skate half cab
+vans skate half cab wafflecup
 vans skate old skool
 vans skate old skool 36 +
 vans skate rowley
