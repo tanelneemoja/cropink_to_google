@@ -40,6 +40,7 @@ adidas ozweego
 adidas performance ultraboost dna
 adidas response cl
 adidas rivalry low
+adidas samba jane
 adidas samba lt
 adidas samba og
 adidas samba xlg
@@ -115,8 +116,10 @@ birkenstock arizona suede leather
 birkenstock boston leve black
 birkenstock boston leve latte cream
 birkenstock boston leve sandcastle
+birkenstock boston leve taupe
 birkenstock boston sfb leve dark tea tonal fb
 birkenstock zermatt premium shearling leve mink laf
+carhartt wip slippers
 champion low cut shoe z80 desert ash low
 converse as-1 pro ox
 converse as-1 pro ox cliffside
@@ -124,6 +127,9 @@ converse chuck 70 2-in-1
 converse chuck 70 cdg
 converse chuck 70 cdg hi
 converse chuck 70 cdg ox
+converse chuck 70 de luxe pointed hi
+converse chuck 70 de luxe squared hi
+converse chuck 70 de luxe wedge hi
 converse chuck 70 hi
 converse chuck 70 hi patta
 converse chuck 70 national ox
@@ -244,6 +250,7 @@ nike air force 1 low retro
 nike air force 1 lv8 3
 nike air force 1 mid ´07
 nike air force 1 prm mf
+nike air force 1 retro ll qs
 nike air force 1 ´07
 nike air force 1 ´07 fresh
 nike air force 1 ´07 lv8
@@ -257,6 +264,7 @@ nike air humara qs
 nike air jordan 3 retro
 nike air max 1
 nike air max 1 ess
+nike air max 1 prm
 nike air max 1 ´87 t
 nike air max 90
 nike air max 90 prm
@@ -276,10 +284,13 @@ nike air max portal se
 nike air max sndr
 nike air max tl 2.5
 nike air more uptempo low
+nike air more uptempo ´96
+nike air zoom spiridon sp
 nike blazer roam mid
 nike c1ty
 nike c1ty prm
 nike calm slide
+nike calm slide se
 nike cortez
 nike dunk hi retro
 nike dunk high
@@ -394,8 +405,11 @@ vans cruze too cc
 vans era 95 dx
 vans hylane
 vans knu skool
+vans knu skool retro skate
+vans knu stack
 vans lx authentic 44
 vans lx half cab reissue 33
+vans lx mule style 17
 vans lx old skool
 vans lx old skool 36
 vans lx sk8-hi reissue 38
