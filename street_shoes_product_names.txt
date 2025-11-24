@@ -1,6 +1,3 @@
-adidas adi2000
-adidas adifom q
-adidas adilette 22
 adidas adimatic
 adidas adimule
 adidas adiracer lo
@@ -12,8 +9,6 @@ adidas campus 00s wtr lo
 adidas campus 00s wtr md
 adidas climacool 1
 adidas falcon
-adidas forum 84 low
-adidas forum low
 adidas forum low cl
 adidas forum2000
 adidas gazelle
@@ -22,22 +17,12 @@ adidas gazelle indoor
 adidas gazelle j
 adidas gazelle stack
 adidas handball spezial
-adidas hyperturf
 adidas jabbar hi
 adidas jabbar lo
 adidas megaride
 adidas montreal rm
 adidas muenchen
-adidas niteball
-adidas nizza platform mid
-adidas nmd_r1
-adidas nmd_r1 primeblue
-adidas nmd_v3
-adidas ozelia
-adidas ozmillen
-adidas oztral
 adidas ozweego
-adidas performance ultraboost dna
 adidas response cl
 adidas rivalry low
 adidas samba jane
@@ -47,10 +32,7 @@ adidas samba xlg
 adidas sambae
 adidas sl 72 og
 adidas sl 72 rs
-adidas stan smith millencon
 adidas superstar
-adidas superstar bonega
-adidas superstar bonega x
 adidas superstar ii
 adidas taekwondo
 adidas taekwondo lace
@@ -128,7 +110,6 @@ converse chuck 70 cdg
 converse chuck 70 cdg hi
 converse chuck 70 cdg ox
 converse chuck 70 de luxe pointed hi
-converse chuck 70 de luxe squared hi
 converse chuck 70 de luxe wedge hi
 converse chuck 70 hi
 converse chuck 70 hi patta
@@ -147,7 +128,6 @@ converse ctas lugged 2.0 cc x-hi
 converse ctas lugged heel hi
 converse ctas lugged heel loafer ox
 converse ctas lugged heel sandal
-converse ctas modern lift hi
 converse essential slide
 converse fastbreak pro mid
 converse fastbreak pro mid into the void
@@ -182,7 +162,6 @@ jordan heir series
 jordan hydrip
 jordan hydrip ps
 jordan hydrip td
-jordan jumpman two trey
 jordan max aura 5
 jordan max aura 5 (gs)
 jordan mvp
@@ -197,12 +176,6 @@ jordan spizike low
 jordan stadium 90
 jordan stay loyal 3 (gs)
 jordan true flight
-karhu albatross control
-karhu aria 95
-karhu fusion 2.0
-karhu fusion xc
-karhu fusion2.0
-karhu legacy 96
 new balance 1000
 new balance 1080 lifestyle
 new balance 1906
@@ -287,7 +260,6 @@ nike blazer roam mid
 nike c1ty
 nike c1ty prm
 nike calm slide
-nike calm slide se
 nike cortez
 nike dunk hi retro
 nike dunk high
@@ -338,7 +310,6 @@ puma inhale smile
 puma inhale urban explorer
 puma karmen ii idol mid
 puma la france
-puma la france amour
 puma la france heatmap
 puma la france rnr
 puma mayze crashed wns
@@ -379,7 +350,6 @@ puma velophasis born in the 2000s
 puma velophasis retreat yourself wns
 puma x fenty avanti
 reebok club c 85
-reebok club c cardi v2
 saucony 3d grid hurricane
 saucony dxn trainer vintage
 saucony grid azura 2000
@@ -395,24 +365,18 @@ the north face glenclyffe zip gore-tex
 the north face nse tent mule iv
 vans a classic slip-on
 vans authentic
-vans classic slip-on
 vans crosspath xc
-vans cruze too cc
 vans era 95 dx
 vans hylane
 vans knu skool
-vans knu skool retro skate
-vans knu stack
 vans lx authentic 44
 vans lx half cab reissue 33
 vans lx mule style 17
 vans lx old skool
 vans lx old skool 36
-vans lx sk8-hi reissue 38
 vans lx sk8-mid reissue 83
 vans mn kyle walker
 vans mn skate sk8-hi
-vans mte sk8-hi waterproof
 vans old skool
 vans old skool insulated
 vans old skool vr3
@@ -429,7 +393,6 @@ vans skate safe low
 vans speed ls
 vans speed ws
 vans sport low
-vans sport low suede
 vans super lowpro
 vans u old skool
 vans ua classic slip-on
