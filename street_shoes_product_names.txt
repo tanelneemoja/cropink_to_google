@@ -101,7 +101,6 @@ birkenstock arizona suede leather
 birkenstock boston leve black
 birkenstock boston leve latte cream
 birkenstock boston leve sandcastle
-birkenstock boston leve taupe
 birkenstock boston sfb leve dark tea tonal fb
 birkenstock zermatt premium shearling leve mink laf
 carhartt wip slippers
@@ -132,6 +131,7 @@ converse ctas lugged 2.0 cc x-hi
 converse ctas lugged heel hi
 converse ctas lugged heel loafer ox
 converse ctas lugged heel sandal
+converse ctas modern lift hi
 converse essential slide
 converse fastbreak pro mid
 converse fastbreak pro mid into the void
@@ -229,7 +229,6 @@ nike air force 1 goretex
 nike air force 1 le
 nike air force 1 lo
 nike air force 1 low retro
-nike air force 1 luxe
 nike air force 1 lv8 3
 nike air force 1 mid ´07
 nike air force 1 prm mf
@@ -328,7 +327,6 @@ puma inhale
 puma inhale reflective
 puma inhale smile
 puma inhale urban explorer
-puma karmen ii idol mid
 puma la france
 puma la france heatmap
 puma la france rnr
