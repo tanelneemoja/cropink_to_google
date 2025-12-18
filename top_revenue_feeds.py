@@ -24,22 +24,48 @@ FEED_URLS = {
     'FI': 'https://backend.ballzy.eu/fi/amfeed/feed/download?id=103&file=cropink_fi.xml'
 }
 
+The error occurred because Python and Pandas are case-sensitive. Even though the words are the same, your sheet uses lowercase for "name" and "revenue" (e.g., Corrected name instead of Corrected Name).
+
+I have updated the script below to match your exact headers: Corrected name and Item revenue.
+
+The Corrected Python Script (top_revenue_feeds.py)
+Python
+
+import pandas as pd
+import requests
+import xml.etree.ElementTree as ET
+import os
+
+# --- CONFIGURATION ---
+# Pulls the Sheet ID from the GitHub YAML 'env' section
+SHEET_ID = os.environ.get('GOOGLE_SHEET_ID', 'PASTE_YOUR_DEFAULT_ID_HERE')
+
+# Update these GIDs from your browser URL for each tab
+COUNTRY_GIDS = {
+    'EE': '0',        
+    'LT': '11111111', 
+    'LV': '22222222', 
+    'FI': '33333333'  
+}
+
+FEED_URLS = {
+    'EE': 'https://www.weekend.ee/google_feed_ee.xml',
+    'LT': 'https://www.weekend.lt/google_feed_lt.xml',
+    'LV': 'https://www.weekend.lv/google_feed_lv.xml',
+    'FI': 'https://www.weekendshoes.fi/google_feed_fi.xml'
+}
+
 def get_xml_feed_map(url):
-    """
-    Downloads XML and maps Title -> Link. 
-    Handles both standard and Google-namespaced tags.
-    """
+    """Downloads XML and maps Title -> Link."""
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
         root = ET.fromstring(response.content)
         
         feed_map = {}
-        # Namespaces often used in Google Merchant feeds
         namespaces = {'g': 'http://base.google.com/ns/1.0'}
         
         for item in root.findall('.//item'):
-            # Try standard <title> first, then <g:title>
             title_node = item.find('title')
             if title_node is None:
                 title_node = item.find('g:title', namespaces)
@@ -67,45 +93,47 @@ def process_country_feed(country, gid):
         print(f"   [!] Download failed: {e}")
         return
 
-    # 2. Revenue Aggregation & Deduplication
-    # Use 'Item Revenue' and 'Corrected Name' per your requirement
-    if 'Corrected Name' not in df.columns or 'Item Revenue' not in df.columns:
-        print(f"   [!] Headers missing. Found: {list(df.columns)}")
+    # 2. MATCH EXACT HEADERS FROM YOUR LOG: 'Corrected name' and 'Item revenue'
+    col_name = 'Corrected name'
+    col_rev = 'Item revenue'
+
+    if col_name not in df.columns or col_rev not in df.columns:
+        print(f"   [!] Headers still not matching. Found: {list(df.columns)}")
         return
 
-    # Convert revenue to number, ignoring text errors
-    df['Item Revenue'] = pd.to_numeric(df['Item Revenue'], errors='coerce').fillna(0)
+    # Convert revenue to number
+    df[col_rev] = pd.to_numeric(df[col_rev], errors='coerce').fillna(0)
     
-    # SUM revenue for duplicates found in 'Corrected Name'
-    df_summed = df.groupby('Corrected Name')['Item Revenue'].sum().reset_index()
+    # 3. DEDUPLICATION: SUM revenue for duplicates in 'Corrected name'
+    df_summed = df.groupby(col_name)[col_rev].sum().reset_index()
     
-    # 3. Get Top 50 by Summed Revenue
-    top_50 = df_summed.sort_values(by='Item Revenue', ascending=False).head(50)
+    # 4. Get Top 50 by Revenue
+    top_50 = df_summed.sort_values(by=col_rev, ascending=False).head(50)
     
-    # 4. Match against XML Feed
+    # 5. Match against XML Feed
     feed_map = get_xml_feed_map(FEED_URLS[country])
     page_feed_rows = []
     
     for _, row in top_50.iterrows():
-        name = str(row['Corrected Name']).strip()
+        name = str(row[col_name]).strip()
         if name in feed_map:
             page_feed_rows.append({
                 'Page URL': feed_map[name],
                 'Custom label': f'Top50_{country}'
             })
     
-    # 5. Export Individual CSV for Google Ads
+    # 6. Export Individual CSV
     if page_feed_rows:
         output_df = pd.DataFrame(page_feed_rows)
         filename = f"{country}_page_feed.csv"
-        # Output headers: Page URL, Custom label
+        # Output strictly requires: Page URL, Custom label
         output_df.to_csv(filename, index=False)
         print(f"   [Success] Created {filename} with {len(page_feed_rows)} items.")
     else:
-        print(f"   [!] No matches found for {country}. Check if 'Corrected Name' matches XML titles.")
+        print(f"   [!] No matches found for {country}. Check if product names in 'Corrected name' match XML titles.")
 
 def main():
-    if SHEET_ID == 'PASTE_YOUR_DEFAULT_ID_HERE':
+    if SHEET_ID == 'PASTE_YOUR_DEFAULT_ID_HERE' and 'GOOGLE_SHEET_ID' not in os.environ:
         print("Error: GOOGLE_SHEET_ID environment variable is missing.")
         return
 
