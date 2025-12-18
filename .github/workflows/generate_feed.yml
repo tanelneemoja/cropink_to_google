@@ -3,18 +3,19 @@ name: Generate Google Ads CSV Feed
 on:
   schedule:
     - cron: '0 */6 * * *' # Run every 6 hours
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch: 
   push:
     paths:
       - 'transform_cropink_feed.py'
-      - 'street_shoes_extractor.py' # Includes the new script
+      - 'street_shoes_extractor.py'
+      - 'top_revenue_feeds.py'  # Added trigger for the new script
       - '.github/workflows/generate_feed.yml'
 
 jobs:
   generate_csv:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # This permission is crucial for the auto-commit action
+      contents: write 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,29 +27,32 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # The new script needs 'requests', which is already here.
           pip install requests pandas
 
-      # 1. Run the original transformation script (CSV generation)
+      # 1. Run the original transformation script
       - name: Run Primary Transformation Script (CSV)
         run: python transform_cropink_feed.py
         env:
-          # This variable is used by your original script
           CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
 
-      # 2. Run the new Street Shoes extractor script (TXT generation)
+      # 2. Run the Street Shoes extractor script
       - name: Run Street Shoes Product Extractor (TXT)
         run: python street_shoes_extractor.py
         env:
-          # This variable matches the 'FEED_URL' name expected by the new Python script
           FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
 
-      # 3. Commit both the CSV and the new TXT file
+      # 3. NEW: Run the 4-Country Top Revenue Feeds script
+      - name: Generate Top 50 Revenue Page Feeds (4 Countries)
+        run: python top_revenue_feeds.py
+        # You can add your SHEET_ID here if you don't want it hardcoded in the script
+        env:
+          GOOGLE_SHEET_ID: '1ZLASFV0JVAeIT4J3B4RNu-8NhDLFqd0Wsye2M_9eAR8'
+
+      # 4. Commit all generated files
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          # Updated file_pattern to include the new text file
-          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt'
-          commit_message: 'Automated: Update feeds (CSV and Street Shoes list)'
-          # Optional: Specify author details for the commit
+          # Use a wildcard to capture all 4 country files: EE_page_feed.csv, LT_page_feed.csv, etc.
+          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv'
+          commit_message: 'Automated: Update feeds including Country Top 50s'
           commit_author: 'GitHub Actions <action@github.com>'
