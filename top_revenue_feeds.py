@@ -24,37 +24,6 @@ FEED_URLS = {
     'FI': 'https://backend.ballzy.eu/fi/amfeed/feed/download?id=103&file=cropink_fi.xml'
 }
 
-The error occurred because Python and Pandas are case-sensitive. Even though the words are the same, your sheet uses lowercase for "name" and "revenue" (e.g., Corrected name instead of Corrected Name).
-
-I have updated the script below to match your exact headers: Corrected name and Item revenue.
-
-The Corrected Python Script (top_revenue_feeds.py)
-Python
-
-import pandas as pd
-import requests
-import xml.etree.ElementTree as ET
-import os
-
-# --- CONFIGURATION ---
-# Pulls the Sheet ID from the GitHub YAML 'env' section
-SHEET_ID = os.environ.get('GOOGLE_SHEET_ID', 'PASTE_YOUR_DEFAULT_ID_HERE')
-
-# Update these GIDs from your browser URL for each tab
-COUNTRY_GIDS = {
-    'EE': '0',        
-    'LT': '11111111', 
-    'LV': '22222222', 
-    'FI': '33333333'  
-}
-
-FEED_URLS = {
-    'EE': 'https://www.weekend.ee/google_feed_ee.xml',
-    'LT': 'https://www.weekend.lt/google_feed_lt.xml',
-    'LV': 'https://www.weekend.lv/google_feed_lv.xml',
-    'FI': 'https://www.weekendshoes.fi/google_feed_fi.xml'
-}
-
 def get_xml_feed_map(url):
     """Downloads XML and maps Title -> Link."""
     try:
