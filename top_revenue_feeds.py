@@ -1,9 +1,3 @@
-Here is the complete, production-ready Python script (top_revenue_feeds.py).
-
-This version is optimized for your GitHub Actions workflow: it uses environment variables for the Sheet ID, handles deduplication by summing revenue, and generates four separate CSV files formatted for Google Ads Page Feeds.
-
-Python
-
 import pandas as pd
 import requests
 import xml.etree.ElementTree as ET
