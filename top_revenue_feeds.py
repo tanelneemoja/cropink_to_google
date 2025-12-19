@@ -24,35 +24,6 @@ FEED_URLS = {
     'FI': 'https://backend.ballzy.eu/fi/amfeed/feed/download?id=103&file=cropink_fi.xml'
 }
 
-I have integrated the URL security enforcement into the script. The logic now specifically intercepts any http:// link found in your XML feeds and forces it to https://.
-
-This is applied both at the parsing stage (when reading the XML) and during the final URL cleanup, ensuring that no matter how the link is formatted in the source, your Google Ads Page Feed stays strictly secure.
-
-The Final "Forced HTTPS" Script (top_revenue_feeds.py)
-Python
-
-import pandas as pd
-import requests
-import xml.etree.ElementTree as ET
-import os
-
-# --- CONFIGURATION ---
-SHEET_ID = os.environ.get('GOOGLE_SHEET_ID', 'PASTE_YOUR_DEFAULT_ID_HERE')
-
-COUNTRY_GIDS = {
-    'EE': '0',        
-    'LT': '11111111', 
-    'LV': '22222222', 
-    'FI': '33333333'  
-}
-
-FEED_URLS = {
-    'EE': 'https://www.weekend.ee/google_feed_ee.xml',
-    'LT': 'https://www.weekend.lt/google_feed_lt.xml',
-    'LV': 'https://www.weekend.lv/google_feed_lv.xml',
-    'FI': 'https://www.weekendshoes.fi/google_feed_fi.xml'
-}
-
 def clean_text(text):
     """Normalize text for matching (lowercase, strip, fix quotes)."""
     if not text:
