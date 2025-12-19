@@ -25,10 +25,21 @@ FEED_URLS = {
 }
 
 def clean_name(text):
-    """Essential cleaning to match Sheet names with XML titles."""
+    """Normalize text for matching."""
     if not text: return ""
-    # Lowercase, strip whitespace/newlines, and fix the specific '07 accent issue
     return str(text).lower().strip().replace('´', "'").replace('’', "'")
+
+def force_https_clean(url_text):
+    """Aggressively strips whitespace and forces https."""
+    if not url_text: return ""
+    # Strip whitespace, newlines, and tabs often hidden in CDATA
+    clean_url = str(url_text).strip()
+    if clean_url.startswith("http://"):
+        return clean_url.replace("http://", "https://", 1)
+    elif not clean_url.startswith("https://") and "://" not in clean_url:
+        # Fallback for protocol-relative links
+        return "https://" + clean_url.lstrip("/")
+    return clean_url
 
 def get_xml_feed_map(url):
     """Parses XML and maps cleaned g:title -> forced https g:link."""
@@ -45,13 +56,9 @@ def get_xml_feed_map(url):
             link_node = item.find('g:link', ns) or item.find('link')
                 
             if title_node is not None and link_node is not None:
-                # Clean title for the key, Force HTTPS for the value
-                t_text = title_node.text if title_node.text else ""
-                l_text = link_node.text if link_node.text else ""
-                
-                title_key = clean_name(t_text)
-                # Force HTTPS and remove any whitespace/newlines from CDATA
-                secure_link = l_text.strip().replace('http://', 'https://')
+                title_key = clean_name(title_node.text)
+                # Apply aggressive HTTPS cleaning
+                secure_link = force_https_clean(link_node.text)
                 
                 if title_key and title_key not in feed_map:
                     feed_map[title_key] = secure_link
@@ -78,17 +85,11 @@ def process_country_feed(country, gid):
         print(f"   [!] Headers missing. Found: {list(df.columns)}")
         return
 
-    # 1. Clean data & Aggregate Revenue (Sum duplicates)
     df[rev_col] = pd.to_numeric(df[rev_col], errors='coerce').fillna(0)
     unique_products = df.groupby(name_col)[rev_col].sum().reset_index()
-    
-    # 2. Sort by revenue (Highest first)
     unique_products = unique_products.sort_values(by=rev_col, ascending=False)
     
-    # 3. Load the secure XML Map
     feed_map = get_xml_feed_map(FEED_URLS[country])
-    
-    # 4. Iteratively find exactly 50 unique items
     page_feed_results = []
     seen_urls = set()
 
@@ -97,7 +98,6 @@ def process_country_feed(country, gid):
             break
             
         sheet_name_clean = clean_name(row[name_col])
-        
         if sheet_name_clean in feed_map:
             match_url = feed_map[sheet_name_clean]
             if match_url not in seen_urls:
@@ -107,18 +107,20 @@ def process_country_feed(country, gid):
                 })
                 seen_urls.add(match_url)
 
-    # 5. Export to CSV
     if page_feed_results:
+        # LOGGING CHECK: Print the first URL to verify HTTPS in GitHub logs
+        print(f"   [Log Check] First URL: {page_feed_results[0]['Page URL']}")
+        
         final_df = pd.DataFrame(page_feed_results)
         filename = f"{country}_page_feed.csv"
         final_df.to_csv(filename, index=False)
         print(f"   [Done] {filename} saved with {len(page_feed_results)} items.")
     else:
-        print(f"   [!] No matches found for {country}. Check naming consistency.")
+        print(f"   [!] No matches found for {country}.")
 
 def main():
     if SHEET_ID == 'PASTE_YOUR_DEFAULT_ID_HERE' and 'GOOGLE_SHEET_ID' not in os.environ:
-        print("Error: Missing GOOGLE_SHEET_ID in environment.")
+        print("Error: Missing GOOGLE_SHEET_ID.")
         return
         
     for country, gid in COUNTRY_GIDS.items():
