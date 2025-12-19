@@ -33,7 +33,7 @@ def clean_text(text):
     return text
 
 def get_xml_feed_map(url):
-    """Parses XML and creates a dictionary of cleaned g:title -> g:link."""
+    """Parses XML and creates a dictionary of cleaned g:title -> secure g:link."""
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
@@ -44,13 +44,8 @@ def get_xml_feed_map(url):
         
         items = root.findall('.//item')
         for item in items:
-            title_node = item.find('g:title', ns)
-            if title_node is None:
-                title_node = item.find('title')
-            
-            link_node = item.find('g:link', ns)
-            if link_node is None:
-                link_node = item.find('link')
+            title_node = item.find('g:title', ns) or item.find('title')
+            link_node = item.find('g:link', ns) or item.find('link')
                 
             if title_node is not None and link_node is not None:
                 raw_title = title_node.text if title_node.text else ""
@@ -58,9 +53,11 @@ def get_xml_feed_map(url):
                 
                 if raw_title:
                     cleaned_title = clean_text(raw_title)
-                    # If duplicate titles in XML, this keeps the first link found
+                    # Convert to HTTPS and strip any whitespace/CDATA junk
+                    secure_link = raw_link.strip().replace('http://', 'https://')
+                    
                     if cleaned_title not in feed_map:
-                        feed_map[cleaned_title] = raw_link.strip()
+                        feed_map[cleaned_title] = secure_link
                     
         return feed_map
     except Exception as e:
@@ -92,7 +89,6 @@ def process_country_feed(country, gid):
         print(f"   [!] Failed to download sheet: {e}")
         return
 
-    # Set column names based on your sheet headers
     name_col = 'Corrected name'
     rev_col = 'Item revenue'
 
@@ -100,20 +96,19 @@ def process_country_feed(country, gid):
         print(f"   [!] Error: Headers '{name_col}' or '{rev_col}' missing.")
         return
 
-    # 1. Deduplicate & Aggregate: Sum revenue for same 'Corrected name'
+    # 1. Deduplicate & Aggregate Revenue
     df[rev_col] = pd.to_numeric(df[rev_col], errors='coerce').fillna(0)
-    # This reduces all duplicates of the same shoe into one single row
     unique_products = df.groupby(name_col)[rev_col].sum().reset_index()
     
-    # 2. Sort by total revenue (highest first)
+    # 2. Sort by total revenue
     unique_products = unique_products.sort_values(by=rev_col, ascending=False)
     
-    # 3. Load the corresponding Country XML Feed
+    # 3. Load Feed
     feed_map = get_xml_feed_map(FEED_URLS[country])
     
-    # 4. Find exactly 50 matching products
+    # 4. Find exactly 50 unique matching products
     page_feed_results = []
-    seen_urls = set() # To ensure we don't list the same URL twice
+    seen_urls = set()
 
     for _, row in unique_products.iterrows():
         if len(page_feed_results) >= 50:
@@ -134,7 +129,7 @@ def process_country_feed(country, gid):
         final_df = pd.DataFrame(page_feed_results)
         filename = f"{country}_page_feed.csv"
         final_df.to_csv(filename, index=False)
-        print(f"   [Done] {filename} saved with {len(page_feed_results)} unique items.")
+        print(f"   [Done] {filename} saved with {len(page_feed_results)} HTTPS items.")
     else:
         print(f"   [!] Warning: No matches found for {country}.")
 
@@ -145,6 +140,9 @@ def main():
         
     for country, gid in COUNTRY_GIDS.items():
         process_country_feed(country, gid)
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
