@@ -33,13 +33,13 @@ jobs:
       - name: Run Primary Transformation Script (CSV)
         run: python transform_cropink_feed.py
         env:
-          CROPINK_FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
+          CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
       # 2. Run the Street Shoes extractor script
       - name: Run Street Shoes Product Extractor (TXT)
         run: python street_shoes_extractor.py
         env:
-          FEED_URL: https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4
+          FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
       # 3. NEW: Run the 4-Country Top Revenue Feeds script
       - name: Generate Top 50 Revenue Page Feeds (4 Countries)
