@@ -153,7 +153,7 @@ def transform_cropink_to_google_ads_csv(cropink_url, output_csv_base="google_ads
     return success
 
 if __name__ == "__main__":
-    cropink_feed_url = os.environ.get('CROPINK_FEED_URL', "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4")
+    cropink_feed_url = os.environ.get('CROPINK_FEED_URL', "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml")
     output_csv_base = os.environ.get('OUTPUT_CSV_BASE', "google_ads_feed")
 
     success = transform_cropink_to_google_ads_csv(cropink_feed_url, output_csv_base)
