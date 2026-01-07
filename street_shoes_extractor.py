@@ -5,7 +5,7 @@ import re
 
 # --- Configuration ---
 # FIX: Hardcoded the URL to bypass environment variable errors as requested.
-XML_FEED_URL = "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4"
+XML_FEED_URL = "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
 OUTPUT_FILENAME = "street_shoes_product_names.txt"
 TARGET_CATEGORY_PART = "Street Shoes"
 
