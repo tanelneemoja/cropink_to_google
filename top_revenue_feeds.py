@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 import xml.etree.ElementTree as ET
 import os
-
+ 
 # --- CONFIGURATION ---
 # This pulls from the 'env' section of your GitHub YAML
 SHEET_ID = os.environ.get('GOOGLE_SHEET_ID', 'PASTE_YOUR_DEFAULT_ID_HERE')
