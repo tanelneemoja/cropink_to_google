@@ -49,23 +49,33 @@ def get_xml_feed_map(url):
         root = ET.fromstring(response.content)
         
         feed_map = {}
+        # Google Merchant Center namespace
         ns = {'g': 'http://base.google.com/ns/1.0'}
         
-        for item in root.findall('.//item'):
-            title_node = item.find('g:title', ns) or item.find('title')
-            link_node = item.find('g:link', ns) or item.find('link')
+        items = root.findall('.//item')
+        print(f"    [Debug] Found {len(items)} items in XML feed.")
+
+        for item in items:
+            # FIX: Use 'is not None' to avoid DeprecationWarning
+            title_node = item.find('g:title', ns)
+            if title_node is None:
+                title_node = item.find('title')
+                
+            link_node = item.find('g:link', ns)
+            if link_node is None:
+                link_node = item.find('link')
                 
             if title_node is not None and link_node is not None:
                 title_key = clean_name(title_node.text)
-                # Apply aggressive HTTPS cleaning
                 secure_link = force_https_clean(link_node.text)
                 
                 if title_key and title_key not in feed_map:
                     feed_map[title_key] = secure_link
-                    
+        
+        print(f"    [Debug] Mapped {len(feed_map)} unique titles from feed.")
         return feed_map
     except Exception as e:
-        print(f"   [!] XML Error: {e}")
+        print(f"    [!] XML Error: {e}")
         return {}
 
 def process_country_feed(country, gid):
