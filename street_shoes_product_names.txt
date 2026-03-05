@@ -352,6 +352,7 @@ vans lx old skool 36
 vans lx sk8-hi reissue 38
 vans lx sk8-mid reissue 83
 vans mn skate sk8-hi
+vans mte sk8-hi waterproof
 vans old skool
 vans old skool insulated
 vans old skool vr3
@@ -369,6 +370,7 @@ vans skate old skool
 vans skate old skool 36 +
 vans skate rowley
 vans skate safe low
+vans speed ls
 vans speed ws
 vans sport low
 vans super lowpro
