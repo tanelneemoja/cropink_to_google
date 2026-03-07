@@ -165,9 +165,11 @@ new balance 2002r
 new balance 204l
 new balance 327
 new balance 327 k
+new balance 327 kids new-b hook &amp; loop
 new balance 509
 new balance 530
 new balance 530 kids bungee lace
+new balance 574
 new balance 740
 new balance 740 kids bungee lace
 new balance 9060
@@ -355,11 +357,9 @@ vans lx old skool
 vans lx old skool 36
 vans lx sk8-hi reissue 38
 vans lx sk8-mid reissue 83
-vans mn skate sk8-hi
 vans mte sk8-hi waterproof
 vans old skool
 vans old skool insulated
-vans old skool vr3
 vans old skool waterproof insulated mte
 vans rowley classic
 vans sk8-hi flame
