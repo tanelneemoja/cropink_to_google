@@ -170,7 +170,6 @@ new balance 327 k
 new balance 509
 new balance 530
 new balance 530 kids bungee lace
-new balance 574
 new balance 740
 new balance 740 kids bungee lace
 new balance 9060
@@ -253,6 +252,7 @@ nike dunk low retro prm
 nike dunk low retro se
 nike dunk low se
 nike dunk low ss
+nike dunk low twist
 nike field general
 nike force 1 le ps
 nike force 1 lv8 ps
