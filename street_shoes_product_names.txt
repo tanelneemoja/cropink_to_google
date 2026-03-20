@@ -176,6 +176,7 @@ new balance 740
 new balance 740 kids bungee lace
 new balance 9060
 new balance 9060 kids lace
+new balance 9060 kids toggle closure
 new balance abzorb 2000
 new balance abzorb 2010
 new balance freshfoam hierro v9 goretex
@@ -357,6 +358,7 @@ vans lx half cab reissue 33
 vans lx mule style 17
 vans lx old skool
 vans lx old skool 36
+vans lx old skool ext
 vans lx sk8-hi reissue 38
 vans lx sk8-mid reissue 83
 vans mte sk8-hi waterproof
@@ -372,6 +374,7 @@ vans skate curren
 vans skate half cab
 vans skate half cab wafflecup
 vans skate half cab ´92 goretex
+vans skate loafer
 vans skate old skool
 vans skate old skool 36 +
 vans skate rowley
