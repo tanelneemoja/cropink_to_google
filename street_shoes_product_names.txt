@@ -29,7 +29,6 @@ adidas samba xlg
 adidas sambae
 adidas sl 72 og
 adidas sl 72 rs
-adidas superstar
 adidas superstar ii
 adidas taekwondo
 adidas taekwondo lace
@@ -40,7 +39,6 @@ air jordan 1 low prm
 air jordan 1 low se
 air jordan 1 mid
 air jordan 1 mid se
-air jordan 1 mid ss
 air jordan 1 mm low v3
 air jordan 1 retro hi og
 air jordan 1 retro high og
@@ -53,7 +51,6 @@ air jordan 3 retro
 air jordan 4 retro
 air jordan 4 rm
 air jordan 4 rm psg
-air jordan 4 rm se
 air jordan 4rm
 air jordan 5 retro og
 air jordan 8 retro
@@ -147,15 +144,11 @@ jordan cmft era
 jordan day1 e.o.
 jordan flight court
 jordan heir series
-jordan hydrip
-jordan hydrip ps
-jordan hydrip td
 jordan mvp 92
 jordan session
 jordan sky jordan 1 ps
 jordan sky jordan 1 td
 jordan spizike low
-jordan stay loyal 3
 new balance 1000
 new balance 1000g
 new balance 1080 lifestyle
@@ -235,13 +228,11 @@ nike air max dn8 nrg
 nike air max dn8 prm
 nike air max dn8 se
 nike air max muse se
-nike air max portal
 nike air max portal se
 nike air max sndr
 nike air more uptempo low
 nike air zoom spiridon sp
 nike ava rover
-nike blazer roam mid
 nike c1ty prm
 nike cortez
 nike dunk hi retro
@@ -276,10 +267,8 @@ nike shox tl
 nike shox tl print
 nike shox tl se
 nike shox z
-nike v2k run
 nike v2k run goretex
 nike vomero 18 goretex
-nike vomero 5
 nike vomero plus
 nike zoom vomero 5
 nike zoom vomero 5 se
