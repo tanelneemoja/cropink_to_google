@@ -30,6 +30,7 @@ adidas sambae
 adidas sl 72 og
 adidas sl 72 rs
 adidas superstar ii
+adidas superstar ii anthony edwards
 adidas taekwondo
 adidas taekwondo lace
 adidas tokyo
@@ -198,24 +199,6 @@ nike air force 1 ´07 nn
 nike air force 1 ´07 prm
 nike air force 1 ´07 vintage
 nike air force 1 ´07 wb
-nike air jordan 1 low
-nike air jordan 1 low (gs)
-nike air jordan 1 low se
-nike air jordan 1 low se craft (gs)
-nike air jordan 1 mid
-nike air jordan 1 mid (gs)
-nike air jordan 1 mid se
-nike air jordan 1 mm low v3
-nike air jordan 1 retro hi og
-nike air jordan 1 retro high og
-nike air jordan 1 retro low og
-nike air jordan 1 triple stack
-nike air jordan 10 retro
-nike air jordan 13 retro
-nike air jordan 4 retro
-nike air jordan 4 retro (gs)
-nike air jordan 4 retro og fc
-nike air jordan 9 retro
 nike air max 90
 nike air max 90 ltr ps
 nike air max 90 prm
@@ -250,11 +233,7 @@ nike dunk low twist
 nike field general
 nike force 1 le ps
 nike force 1 lv8 ps
-nike jordan cmft era
-nike jordan mvp 92
-nike jordan mvp 92 (gs)
 nike jordan spizike low
-nike jordan spizike low (gs)
 nike killshot 2
 nike kobe air force 1 low
 nike lunar force 1 duckboot
