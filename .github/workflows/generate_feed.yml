@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - 'transform_cropink_feed.py'
+      - 'transform_feed.py'
       - 'street_shoes_extractor.py'
       - 'top_revenue_feeds.py'  # Added trigger for the new script
       - '.github/workflows/generate_feed.yml'
@@ -47,12 +48,15 @@ jobs:
         # You can add your SHEET_ID here if you don't want it hardcoded in the script
         env:
           GOOGLE_SHEET_ID: '1ZLASFV0JVAeIT4J3B4RNu-8NhDLFqd0Wsye2M_9eAR8'
+          
+      - name: Generate LV LT FI Catalogues
+        run: python transform_feed.py
 
       # 4. Commit all generated files
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           # Use a wildcard to capture all 4 country files: EE_page_feed.csv, LT_page_feed.csv, etc.
-          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv'
+          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv'
           commit_message: 'Automated: Update feeds including Country Top 50s'
           commit_author: 'GitHub Actions <action@github.com>'
