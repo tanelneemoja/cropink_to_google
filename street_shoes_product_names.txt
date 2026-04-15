@@ -162,11 +162,13 @@ jordan spizike low (gs)
 jordan true flight
 jordan trunner o/s
 new balance 1000
+new balance 1000d
 new balance 1000g
 new balance 1906 loafers
 new balance 1906 utility
 new balance 1906a
 new balance 1906a tech explosion
+new balance 1906f
 new balance 1906r
 new balance 1906w
 new balance 2002 kids hook &amp; loop
@@ -185,6 +187,7 @@ new balance 9060 kids lace
 new balance 9060 kids toggle closure
 new balance abzorb 2000
 new balance abzorb 2010
+new balance abzorb 5030
 new balance freshfoam hierro v9 goretex
 new balance m1000
 new balance m2002r rich oak dark mushroom apavi
@@ -208,13 +211,13 @@ nike air force 1 ´07
 nike air force 1 ´07 fresh
 nike air force 1 ´07 lv8
 nike air force 1 ´07 lx
+nike air force 1 ´07 lx vibram
 nike air force 1 ´07 nn
 nike air force 1 ´07 prm
 nike air force 1 ´07 vintage
 nike air force 1 ´07 wb
 nike air max 1
 nike air max 90
-nike air max 90 ltr ps
 nike air max 90 prm
 nike air max 90 se
 nike air max 97
@@ -230,11 +233,14 @@ nike air max dn8 prm
 nike air max dn8 se
 nike air max muse
 nike air max muse se
+nike air max plus
 nike air max sndr
 nike air more uptempo low
+nike air zoom spiridon sp
 nike ava rover
 nike c1ty prm
 nike cortez
+nike cortez lt
 nike dunk hi retro
 nike dunk low
 nike dunk low goretex
@@ -268,6 +274,7 @@ nike sprint sister
 nike vomero 18 goretex
 nike vomero plus
 nike zoom vomero 5
+nike zoom vomero 5 se
 nike zoom vomero roam
 on running cloudhorizon 2
 on running cloudtilt remix
@@ -275,10 +282,12 @@ puma ca pro classic puma
 puma creeper phatty
 puma creeper phatty puma
 puma easy rider squid game
+puma fade nitro ls
 puma inhale
 puma inhale reflective
 puma inhale smile
 puma inhale urban explorer
+puma inverse
 puma karmen ii idol mid
 puma la france
 puma la france heatmap
@@ -289,8 +298,10 @@ puma mayze lth wn s
 puma mayze wellis boot wns
 puma morphic base
 puma mostro og
+puma mostro x
 puma palermo
 puma palermo 2 harry potter
+puma palermo cow wns
 puma palermo elevata wns
 puma palermo elevata xtra wns
 puma palermo harry potter
@@ -304,9 +315,13 @@ puma rs surge
 puma rs-x efekt b &amp;b
 puma rs-x hi
 puma rx 737 vintage
+puma speedcat cow wns
+puma speedcat elevated wns
 puma speedcat go wns
+puma speedcat lux
 puma speedcat mid
 puma speedcat og
+puma speedcat plus
 puma suede play.paris
 puma suede squid game
 puma suede xl
