@@ -22,6 +22,7 @@ adidas megaride
 adidas megaride o1
 adidas montreal rm
 adidas muenchen
+adidas samba jane
 adidas samba lt
 adidas samba og
 adidas samba xlg
@@ -275,7 +276,6 @@ nike vomero 18 goretex
 nike vomero plus
 nike zoom vomero 5
 nike zoom vomero 5 se
-nike zoom vomero roam
 on running cloudhorizon 2
 on running cloudtilt remix
 puma ca pro classic puma
