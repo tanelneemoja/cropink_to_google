@@ -8,21 +8,19 @@ adidas campus 00s wtr lo
 adidas campus 00s wtr md
 adidas campus st
 adidas climacool 1
-adidas forum low cl
 adidas gazelle
 adidas gazelle bold
 adidas gazelle indoor
 adidas gazelle lo pro
 adidas gazelle stack
 adidas handball spezial
-adidas jabbar hi
+adidas handball spezial lo
 adidas jabbar lo
 adidas japan
 adidas megaride
 adidas megaride o1
 adidas montreal rm
 adidas muenchen
-adidas samba jane
 adidas samba lt
 adidas samba og
 adidas samba xlg
@@ -51,7 +49,6 @@ air jordan 1 retro low og
 air jordan 1 triple stack
 air jordan 10 retro
 air jordan 11 retro
-air jordan 11 retro ra
 air jordan 12 retro
 air jordan 13 retro
 air jordan 3 retro
@@ -70,7 +67,6 @@ asics gel-kayano 20
 asics gel-kinetic fluent
 asics gel-nunobiki
 asics gel-nyc
-asics gel-quantum 180
 asics gel-quantum 360 vii
 asics gel-venture 6 shield
 asics gt-2160
@@ -93,6 +89,7 @@ birkenstock arizona sfb leoi habana
 birkenstock arizona sfb leve dark tea tonal fb
 birkenstock arizona soft footbed waxy leather
 birkenstock arizona suede leather
+birkenstock boston leoi tabacco brown
 birkenstock boston leve black
 birkenstock boston leve latte cream
 birkenstock boston leve sandcastle
@@ -177,7 +174,6 @@ new balance 2002dx
 new balance 2002r
 new balance 2002r protection pack
 new balance 204l
-new balance 327 k
 new balance 509
 new balance 530
 new balance 530 kids bungee lace
@@ -185,7 +181,6 @@ new balance 740
 new balance 740 kids bungee lace
 new balance 9060
 new balance 9060 kids lace
-new balance 9060 kids toggle closure
 new balance abzorb 2000
 new balance abzorb 2010
 new balance abzorb 5030
@@ -201,12 +196,10 @@ nike air force 1 goretex
 nike air force 1 goretex vibram
 nike air force 1 gtx
 nike air force 1 gtx vibram
-nike air force 1 jewel
 nike air force 1 le
 nike air force 1 lo
 nike air force 1 low
 nike air force 1 low retro
-nike air force 1 lv8
 nike air force 1 mid ´07
 nike air force 1 retro ll qs
 nike air force 1 ´07
@@ -240,7 +233,6 @@ nike air max sndr
 nike air more uptempo low
 nike air zoom spiridon sp
 nike ava rover
-nike c1ty prm
 nike cortez
 nike cortez lt
 nike dunk hi retro
@@ -264,6 +256,7 @@ nike p-6000
 nike p-6000 prm
 nike p-6000 se
 nike pegasus premium
+nike pegasus premium se
 nike reactx rejuven8
 nike shox r4
 nike shox ride 2
@@ -273,6 +266,7 @@ nike shox tl print
 nike shox tl se
 nike shox z
 nike sprint sister
+nike t90 sp
 nike vomero 18 goretex
 nike vomero plus
 nike zoom vomero 5
@@ -296,9 +290,7 @@ puma la france heatmap
 puma la france rnr
 puma mayra
 puma mayze crashed wns
-puma mayze lth wn s
 puma mayze wellis boot wns
-puma morphic base
 puma mostro og
 puma mostro x
 puma palermo
