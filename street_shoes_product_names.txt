@@ -1,13 +1,13 @@
 adidas adimule
 adidas adiracer lo
 adidas adistar control 5
-adidas adizero evo sl
 adidas campus 00s
 adidas campus 00s beta
 adidas campus 00s wtr lo
 adidas campus 00s wtr md
 adidas campus st
 adidas climacool 1
+adidas forum low cl
 adidas gazelle
 adidas gazelle bold
 adidas gazelle indoor
@@ -271,7 +271,6 @@ nike vomero 18 goretex
 nike vomero plus
 nike zoom vomero 5
 nike zoom vomero 5 se
-nike zoom vomero roam
 on running cloudhorizon 2
 on running cloudtilt remix
 puma ca pro classic puma
