@@ -209,6 +209,7 @@ new balance m1000
 new balance m2002r rich oak dark mushroom apavi
 new balance t500
 new balance u9060
+new balance warped runners
 nike af1 shadow
 nike air force 1
 nike air force 1 flyknit 2.0
@@ -236,6 +237,7 @@ nike air max 90
 nike air max 90 prm
 nike air max 90 se
 nike air max 97
+nike air max bia
 nike air max dn
 nike air max dn prm
 nike air max dn se
