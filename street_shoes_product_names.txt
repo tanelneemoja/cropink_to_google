@@ -106,7 +106,6 @@ birkenstock boston leve sandcastle
 birkenstock boston sfb leoi iron
 birkenstock boston sfb leve dark tea tonal fb
 birkenstock florida sfb bf black
-birkenstock yao birko-flor
 birkenstock zermatt premium shearling leve mink laf
 carhartt wip slippers
 champion low cut shoe z80 desert ash low
@@ -266,6 +265,7 @@ nike force 1 le ps
 nike force 1 lv8 ps
 nike jordan spizike low
 nike killshot 2
+nike killshot 2 txt
 nike kobe air force 1 low
 nike lunar force 1 duckboot
 nike p-6000
@@ -379,7 +379,6 @@ vans skate 2 wayvee
 vans skate curren
 vans skate half cab wafflecup
 vans skate loafer
-vans skate old skool
 vans skate old skool 36 +
 vans skate rowley
 vans skate safe low
