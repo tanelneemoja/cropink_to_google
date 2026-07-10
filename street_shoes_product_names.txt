@@ -147,11 +147,13 @@ jordan mvp 92
 jordan mvp 92 (gs)
 jordan session
 jordan sixty plus low
+jordan sixty plus low (gs)
 jordan spizike low
 jordan spizike low (gs)
 jordan tatum 4
 jordan tatum 4 se
 jordan trunner o/s
+jordan trunner o/s (gs)
 new balance 1000
 new balance 1000d
 new balance 1000g
@@ -201,6 +203,7 @@ nike air force 1 mid ´07
 nike air force 1 retro prm
 nike air force 1 ´07
 nike air force 1 ´07 fresh
+nike air force 1 ´07 low crsnt
 nike air force 1 ´07 lv8
 nike air force 1 ´07 lx
 nike air force 1 ´07 lx vibram
@@ -210,11 +213,13 @@ nike air force 1 ´07 vintage
 nike air force 1 ´07 wb
 nike air max 90
 nike air max 90 prm
+nike air max 95 se
 nike air max dn se
 nike air max dn8
 nike air max dn8 lthr
 nike air max dn8 ltr
 nike air max dn8 nrg
+nike air max moto 2k
 nike air max muse
 nike air max muse se
 nike air max plus
@@ -245,12 +250,14 @@ nike shox r4
 nike shox ride 2
 nike shox tl
 nike shox tl se
+nike shox z lace
 nike sprint sister
 nike t90 sp
 nike v5 rnr
 nike vomero 18 goretex
 nike vomero plus
 nike vomero plus se
+nike vomero premium
 nike zoom vomero 5
 nike zoom vomero 5 se
 on running cloudhorizon 2
