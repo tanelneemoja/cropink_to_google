@@ -302,6 +302,7 @@ puma speedcat lux
 puma speedcat mid
 puma speedcat og
 puma speedcat plus
+puma suede charles f. stead
 puma suede play.paris
 puma suede xl
 puma suede xl future
@@ -335,7 +336,6 @@ vans lx old skool
 vans lx old skool 36
 vans lx old skool ext
 vans lx sk8-mid reissue 83
-vans mte sk8-hi waterproof
 vans old skool
 vans old skool insulated
 vans old skool waterproof insulated mte
