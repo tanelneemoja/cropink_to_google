@@ -306,6 +306,7 @@ puma speedcat lux
 puma speedcat mid
 puma speedcat og
 puma speedcat plus
+puma suede charles f. stead
 puma suede play.paris
 puma suede xl
 puma suede xl sk8te wrld
