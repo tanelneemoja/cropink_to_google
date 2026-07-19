@@ -158,7 +158,6 @@ jordan trunner o/s (gs)
 new balance 1000
 new balance 1000d
 new balance 1000g
-new balance 1080 lifestyle
 new balance 1906 loafers
 new balance 1906 utility
 new balance 1906a
