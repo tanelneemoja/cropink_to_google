@@ -69,6 +69,7 @@ asics gel-kayano 14
 asics gel-kayano 20
 asics gel-nunobiki
 asics gel-nyc
+asics gel-nyc 2.0
 asics gel-venture 6 shield
 asics gt-2160
 asics skyhand og
