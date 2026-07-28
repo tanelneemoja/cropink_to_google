@@ -65,6 +65,7 @@ asics gel-1130
 asics gel-cumulus 16
 asics gel-kayano 14
 asics gel-kayano 20
+asics gel-kinetic fluent
 asics gel-nunobiki
 asics gel-nyc
 asics gel-nyc 2.0
@@ -326,6 +327,7 @@ saucony progrid omni 9 matte
 saucony ride millennium
 the north face glenclyffe mule
 the north face glenclyffe zip gore-tex
+ugg tasman ii
 vans authentic
 vans authentic creeper
 vans classic slip-on
@@ -347,7 +349,6 @@ vans rowley classic
 vans sk8-hi gore-tex insulated mte
 vans sk8-hi tapered
 vans skate 2 wayvee
-vans skate curren
 vans skate half cab wafflecup
 vans skate loafer
 vans skate rowley
