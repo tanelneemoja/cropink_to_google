@@ -341,6 +341,7 @@ vans crosspath xc gore-tex mte
 vans hylane
 vans knu skool
 vans lx authentic 44
+vans lx half cab reissue 33
 vans lx loafer 53
 vans lx mule style 17
 vans lx old skool
@@ -356,6 +357,7 @@ vans skate 2 wayvee
 vans skate half cab wafflecup
 vans skate loafer
 vans skate safe low
+vans speed ws
 vans sport low
 vans super lowpro
 vans u old skool
