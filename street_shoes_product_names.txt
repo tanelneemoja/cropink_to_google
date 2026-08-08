@@ -68,7 +68,6 @@ asics gel-1130
 asics gel-cumulus 16
 asics gel-kayano 14
 asics gel-kayano 20
-asics gel-kinetic fluent
 asics gel-nunobiki
 asics gel-nyc
 asics gel-nyc 2.0
