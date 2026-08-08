@@ -1,5 +1,7 @@
+adidas adimule
 adidas adiracer lo
 adidas adistar control 5
+adidas adistar xlg 2.0
 adidas campus 00s
 adidas campus 00s beta
 adidas campus 00s wtr lo
@@ -247,8 +249,10 @@ nike field general
 nike force 1 le ps
 nike kobe air force 1 low
 nike p-6000
+nike p-6000 mm
 nike p-6000 prm
 nike p-6000 se
+nike p-6000 se los
 nike pegasus premium
 nike pegasus premium se
 nike reactx rejuven8
@@ -274,12 +278,14 @@ on running cloudhorizon 2
 on running cloudmonster void
 on running cloudswift amp
 on running cloudtilt remix
+puma a$ap rocky x puma suede 94
 puma brasil lth
 puma creeper phatty
 puma creeper phatty puma
 puma easy rider squid game
 puma fade nitro ls
 puma h-street og
+puma homura og+
 puma inhale
 puma inhale reflective
 puma inhale smile
@@ -340,7 +346,6 @@ vans crosspath xc gore-tex mte
 vans hylane
 vans knu skool
 vans lx authentic 44
-vans lx half cab reissue 33
 vans lx loafer 53
 vans lx mule style 17
 vans lx old skool
