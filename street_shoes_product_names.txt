@@ -8,6 +8,7 @@ adidas campus 00s wtr lo
 adidas campus 00s wtr md
 adidas campus st
 adidas climacool 1
+adidas falcon
 adidas gazelle
 adidas gazelle bold
 adidas gazelle indoor
@@ -195,7 +196,9 @@ new balance m1000
 new balance made in usa 990 v6
 new balance rc56
 new balance t500
+new balance u327
 new balance u9060
+new balance warped runners
 nike af1 shadow
 nike air force 1 flyknit 2.0
 nike air force 1 goretex
@@ -236,6 +239,7 @@ nike air more uptempo low
 nike ava rover
 nike cortez
 nike cortez lt
+nike dunk hi retro
 nike dunk low
 nike dunk low (ps)
 nike dunk low goretex
@@ -280,6 +284,7 @@ on running cloudswift amp
 on running cloudtilt remix
 puma a$ap rocky x puma suede 94
 puma brasil lth
+puma ca pro classic puma
 puma creeper phatty
 puma creeper phatty puma
 puma easy rider squid game
