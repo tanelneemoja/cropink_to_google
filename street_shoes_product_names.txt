@@ -1,6 +1,8 @@
 adidas adimatic
+adidas adimule
 adidas adiracer lo
 adidas adistar control 5
+adidas adistar xlg 2.0
 adidas campus 00s
 adidas campus 00s beta
 adidas campus 00s wtr lo
@@ -18,6 +20,7 @@ adidas gazelle stack
 adidas handball spezial
 adidas handball spezial lo
 adidas handball spezial loafer
+adidas hyperboost euphoria
 adidas jabbar hi
 adidas jabbar lo
 adidas japan
@@ -56,6 +59,7 @@ air jordan 11 retro low
 air jordan 13 retro
 air jordan 3 retro
 air jordan 3 retro (gs)
+air jordan 3 retro laser
 air jordan 3 retro og
 air jordan 4 retro
 air jordan 4 retro (gs)
@@ -74,6 +78,7 @@ asics gel-kayano 14
 asics gel-kayano 20
 asics gel-nunobiki
 asics gel-nyc
+asics gel-nyc 2.0
 asics gel-venture 6 shield
 asics gt-2160
 asics skyhand og
@@ -117,18 +122,20 @@ converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
-converse ctas lift hi
 converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
 converse omega trainer se ox
 converse one star pro ox
+converse run star crush ox
 converse run star trainer
 converse wave motion trainer ox
 dr. martens adrian
 dr. martens adrian snaffle black polished smooth
 dr. martens ayce
+dr. martens buzz 5i
 dr. martens buzz 5i dark brown grizzly
+dr. martens buzz hi
 dr. martens dante
 dr. martens forster mid
 dr. martens josef
@@ -284,9 +291,12 @@ nike zoom skylon 11
 nike zoom vomero 5
 nike zoom vomero 5 se
 nike zoom vomero roam
+on running cloud 6
 on running cloudhorizon 2
+on running cloudmonster void
 on running cloudswift amp
 on running cloudtilt remix
+puma a$ap rocky x puma suede 94
 puma brasil lth
 puma ca pro classic puma
 puma creeper phatty
@@ -294,6 +304,7 @@ puma creeper phatty puma
 puma easy rider squid game
 puma fade nitro ls
 puma h-street og
+puma homura og+
 puma inhale
 puma inhale reflective
 puma inhale smile
@@ -360,6 +371,7 @@ vans lx mule style 17
 vans lx old skool
 vans lx old skool 36
 vans lx old skool ext
+vans lx sf moc low
 vans old skool
 vans old skool insulated
 vans old skool waterproof insulated mte
@@ -375,3 +387,5 @@ vans ua authentic
 vans ua classic slip-on
 vans ua old skool
 vans ultrarange neo vr3
+veja campo suede
+veja condor 3
