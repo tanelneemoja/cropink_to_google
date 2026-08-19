@@ -122,6 +122,7 @@ converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
+converse ctas lift hi
 converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
