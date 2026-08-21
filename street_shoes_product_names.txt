@@ -173,6 +173,7 @@ new balance 1000g
 new balance 1906
 new balance 1906 loafers
 new balance 1906 utility
+new balance 1906a
 new balance 1906a tech explosion
 new balance 1906e
 new balance 1906f
@@ -256,6 +257,7 @@ nike ava rover
 nike cortez
 nike cortez lt
 nike dunk low
+nike dunk low (ps)
 nike dunk low goretex
 nike dunk low next nature
 nike dunk low retro
