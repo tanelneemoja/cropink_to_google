@@ -117,6 +117,7 @@ champion low cut shoe z80 desert ash low
 converse as-1 pro ox cliffside
 converse chuck 70
 converse chuck 70 hi
+converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
 converse chuck 70 national ox branch out
 converse chuck 70 ox
@@ -124,6 +125,7 @@ converse chuck 70 rugged hi
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
+converse ctas hi x dragon ball z
 converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
@@ -155,6 +157,7 @@ hoka u speedgoat 2
 jordan 3 retro (ps)
 jordan 3 retro (td)
 jordan 4 retro (ps)
+jordan 4 retro (td)
 jordan cmft era
 jordan flight court
 jordan mvp 92
