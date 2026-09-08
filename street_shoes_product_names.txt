@@ -121,7 +121,6 @@ converse chuck 70 national ox
 converse chuck 70 national ox branch out
 converse chuck 70 ox
 converse chuck 70 rugged hi
-converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
