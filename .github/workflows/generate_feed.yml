@@ -2,22 +2,24 @@ name: Generate Google Ads & ChatGPT Ads CSV Feed
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: "0 */6 * * *"
 
   workflow_dispatch:
 
   push:
     paths:
-      - 'transform_cropink_feed.py'
-      - 'chatgpt_transform.py'
-      - 'transform_feed.py'
-      - 'street_shoes_extractor.py'
-      - 'top_revenue_feeds.py'
-      - 'tiktok_feed.py'
-      - '.github/workflows/generate_feed.yml'
+      - "transform_cropink_feed.py"
+      - "chatgpt_transform.py"
+      - "transform_feed.py"
+      - "street_shoes_extractor.py"
+      - "top_revenue_feeds.py"
+      - "tiktok_feed.py"
+      - ".github/workflows/generate_feed.yml"
+
 
 jobs:
   generate_csv:
+
     runs-on: ubuntu-latest
 
     permissions:
@@ -26,25 +28,27 @@ jobs:
     steps:
 
       # ============================================================
-      # CHECKOUT
+      # 1. CHECKOUT REPOSITORY
       # ============================================================
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
 
       # ============================================================
-      # PYTHON
+      # 2. SET UP PYTHON
       # ============================================================
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
 
       # ============================================================
-      # DEPENDENCIES
+      # 3. INSTALL DEPENDENCIES
       # ============================================================
 
       - name: Install dependencies
@@ -54,100 +58,239 @@ jobs:
 
 
       # ============================================================
-      # 1. GOOGLE ADS / PRIMARY FEED
+      # 4. RUN PRIMARY GOOGLE ADS TRANSFORMATION
       # ============================================================
 
       - name: Run Primary Transformation Script
-        run: python transform_cropink_feed.py
+        run: |
+          python transform_cropink_feed.py
         env:
-          CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
+          CROPINK_FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
 
 
       # ============================================================
-      # 2. CHATGPT ADS FEED
+      # 5. RUN CHATGPT ADS TRANSFORMATION
       # ============================================================
 
       - name: Run ChatGPT Ads Transformation Script
-        run: python chatgpt_transform.py
+        run: |
+          python chatgpt_transform.py
         env:
-         CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
-         SELLER_NAME: Ballzy
-         OUTPUT_CSV_BASE: chatgpt_ads_feed
+          CROPINK_FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
+          SELLER_NAME: "Ballzy"
+          OUTPUT_CSV_BASE: "chatgpt_ads_feed"
 
 
       # ============================================================
-      # 3. STREET SHOES
+      # 6. RUN STREET SHOES EXTRACTOR
       # ============================================================
 
       - name: Run Street Shoes Product Extractor
-        run: python street_shoes_extractor.py
+        run: |
+          python street_shoes_extractor.py
         env:
-          FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
+          FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
 
 
       # ============================================================
-      # 4. TOP REVENUE FEEDS
+      # 7. GENERATE TOP REVENUE FEEDS
       # ============================================================
 
       - name: Generate Top 50 Revenue Page Feeds
-        run: python top_revenue_feeds.py
+        run: |
+          python top_revenue_feeds.py
         env:
-          GOOGLE_SHEET_ID: '1ZLASFV0JVAeIT4J3B4RNu-8NhDLFqd0Wsye2M_9eAR8'
+          GOOGLE_SHEET_ID: "1ZLASFV0JVAeIT4J3B4RNu-8NhDLFqd0Wsye2M_9eAR8"
 
 
       # ============================================================
-      # 5. LV / LT / FI CATALOGUES
+      # 8. GENERATE LV / LT / FI CATALOGUES
       # ============================================================
 
       - name: Generate LV LT FI Catalogues
-        run: python transform_feed.py
+        run: |
+          python transform_feed.py
 
 
       # ============================================================
-      # 6. TIKTOK
+      # 9. GENERATE TIKTOK CATALOG
       # ============================================================
 
       - name: Generate TikTok Catalog Feed
-        run: python tiktok_feed.py
+        run: |
+          python tiktok_feed.py
 
 
       # ============================================================
-      # 7. GITHUB PAGES
+      # 10. GITHUB PAGES
       # ============================================================
 
       - name: Create .nojekyll
-        run: touch .nojekyll
+        run: |
+          touch .nojekyll
+          echo ".nojekyll created"
 
 
       # ============================================================
-      # 8. VERIFY CHATGPT ADS FILES
+      # 11. VERIFY CHATGPT ADS FILES
       # ============================================================
 
       - name: Verify ChatGPT Ads feeds
+        shell: bash
         run: |
-          echo "Checking generated ChatGPT Ads files..."
-
-          ls -lh chatgpt_ads_feed_*.csv
+          set -e
 
           echo ""
-          echo "Lifestyle feed header:"
+          echo "============================================================"
+          echo "CHATGPT ADS FEED VERIFICATION"
+          echo "============================================================"
+
+          echo ""
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Repository files:"
+          ls -lah
+
+          echo ""
+          echo "ChatGPT Ads CSV files:"
+          ls -lah chatgpt_ads_feed_*.csv
+
+          echo ""
+          echo "------------------------------------------------------------"
+          echo "LIFESTYLE FEED"
+          echo "------------------------------------------------------------"
+
+          echo ""
+          echo "Lifestyle file:"
+          ls -lh chatgpt_ads_feed_lifestyle.csv
+
+          echo ""
+          echo "Lifestyle header:"
           head -n 1 chatgpt_ads_feed_lifestyle.csv
 
           echo ""
-          echo "First lifestyle product:"
+          echo "Lifestyle first product:"
           sed -n '2p' chatgpt_ads_feed_lifestyle.csv
 
           echo ""
-          echo "Basketball feed header:"
+          echo "------------------------------------------------------------"
+          echo "BASKETBALL FEED"
+          echo "------------------------------------------------------------"
+
+          echo ""
+          echo "Basketball file:"
+          ls -lh chatgpt_ads_feed_basketball.csv
+
+          echo ""
+          echo "Basketball header:"
           head -n 1 chatgpt_ads_feed_basketball.csv
 
           echo ""
-          echo "First basketball product:"
+          echo "Basketball first product:"
           sed -n '2p' chatgpt_ads_feed_basketball.csv
+
+          echo ""
+          echo "------------------------------------------------------------"
+          echo "SELLER NAME CHECK"
+          echo "------------------------------------------------------------"
+
+          python - <<'PY'
+          import csv
+
+          files = [
+              "chatgpt_ads_feed_lifestyle.csv",
+              "chatgpt_ads_feed_basketball.csv",
+          ]
+
+          for filename in files:
+              print()
+              print(f"Checking: {filename}")
+
+              with open(
+                  filename,
+                  "r",
+                  encoding="utf-8",
+                  newline=""
+              ) as f:
+
+                  reader = csv.DictReader(f)
+
+                  print("Columns:")
+                  print(reader.fieldnames)
+
+                  row = next(reader, None)
+
+                  if row is None:
+                      raise SystemExit(
+                          f"ERROR: {filename} contains no products."
+                      )
+
+                  print()
+                  print("First product:")
+                  print(f"  item_id:       {row.get('item_id')}")
+                  print(f"  title:         {row.get('title')}")
+                  print(f"  url:           {row.get('url')}")
+                  print(f"  brand:         {row.get('brand')}")
+                  print(f"  seller_name:   {row.get('seller_name')}")
+                  print(f"  image_url:     {row.get('image_url')}")
+                  print(f"  availability:  {row.get('availability')}")
+                  print(f"  price:         {row.get('price')}")
+                  print(f"  sale_price:    {row.get('sale_price')}")
+                  print(f"  ads_eligible:  {row.get('is_ads_eligible')}")
+
+                  if "seller_name" not in reader.fieldnames:
+                      raise SystemExit(
+                          f"ERROR: seller_name missing from {filename}"
+                      )
+
+                  if row.get("seller_name") != "Ballzy":
+                      raise SystemExit(
+                          f"ERROR: seller_name is "
+                          f"'{row.get('seller_name')}', expected 'Ballzy'."
+                      )
+
+                  if not row.get("url", "").startswith("https://"):
+                      raise SystemExit(
+                          f"ERROR: Product URL is not HTTPS: "
+                          f"{row.get('url')}"
+                      )
+
+                  if not row.get("image_url", "").startswith("https://"):
+                      raise SystemExit(
+                          f"ERROR: Image URL is not HTTPS: "
+                          f"{row.get('image_url')}"
+                      )
+
+              print(f"OK: {filename}")
+
+          print()
+          print("All ChatGPT Ads feed checks passed.")
+          PY
 
 
       # ============================================================
-      # 9. COMMIT EVERYTHING
+      # 12. SHOW GIT STATUS BEFORE COMMIT
+      # ============================================================
+
+      - name: Show Git status
+        shell: bash
+        run: |
+          echo ""
+          echo "============================================================"
+          echo "GIT STATUS BEFORE COMMIT"
+          echo "============================================================"
+
+          git status --short
+
+          echo ""
+          echo "Git diff statistics:"
+          git diff --stat || true
+
+
+      # ============================================================
+      # 13. COMMIT AND PUSH GENERATED FILES
       # ============================================================
 
       - name: Commit and push generated files
@@ -157,13 +300,37 @@ jobs:
             .nojekyll
             *.csv
             *.csv.gz
-            google_ads_feed_*.csv
-            chatgpt_ads_feed_*.csv
-            street_shoes_product_names.txt
-            *_page_feed.csv
-            ballzy_*.csv
-            tiktok_catalog_feed.csv
+            *.txt
 
-          commit_message: 'Automated: Update product feeds'
+          commit_message: "Automated: Update product feeds"
 
-          commit_author: 'GitHub Actions <action@github.com>'
+          commit_author: "GitHub Actions <action@github.com>"
+
+          commit_user_name: "GitHub Actions"
+
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+
+          push_options: "--force-with-lease"
+
+
+      # ============================================================
+      # 14. FINAL STATUS
+      # ============================================================
+
+      - name: Final repository status
+        shell: bash
+        run: |
+          echo ""
+          echo "============================================================"
+          echo "FINAL STATUS"
+          echo "============================================================"
+
+          git status --short
+
+          echo ""
+          echo "ChatGPT Ads files currently present:"
+
+          ls -lah chatgpt_ads_feed_*.csv || true
+
+          echo ""
+          echo "Workflow completed."
