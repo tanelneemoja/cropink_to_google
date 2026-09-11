@@ -68,10 +68,10 @@ jobs:
       - name: Create .nojekyll file for GitHub Pages
         run: touch .nojekyll
 
-      # 6. Commit all generated files
+      # 7. Commit all generated files
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          file_pattern: 'google_ads_feed_*.csv chatgpt_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv tiktok_catalog_feed.csv'
-          commit_message: 'Automated: Update feeds including ChatGPT Ads feed'
+          file_pattern: '.nojekyll *.csv.gz google_ads_feed_*.csv chatgpt_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv tiktok_catalog_feed.csv'
+          commit_message: 'Automated: Update feeds including compressed ChatGPT Ads feed'
           commit_author: 'GitHub Actions <action@github.com>'
