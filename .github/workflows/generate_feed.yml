@@ -245,10 +245,10 @@ jobs:
                           f"ERROR: seller_name missing from {filename}"
                       )
 
-                  if row.get("seller_name") != "Ballzy":
+                  if row.get("seller_name") != "Streerbrand OÜ":
                       raise SystemExit(
                           f"ERROR: seller_name is "
-                          f"'{row.get('seller_name')}', expected 'Ballzy'."
+                          f"'{row.get('seller_name')}', expected 'Streerbrand OÜ'."
                       )
 
                   if not row.get("url", "").startswith("https://"):
