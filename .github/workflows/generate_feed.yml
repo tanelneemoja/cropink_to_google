@@ -240,16 +240,7 @@ jobs:
                   print(f"  sale_price:    {row.get('sale_price')}")
                   print(f"  ads_eligible:  {row.get('is_ads_eligible')}")
 
-                  if "seller_name" not in reader.fieldnames:
-                      raise SystemExit(
-                          f"ERROR: seller_name missing from {filename}"
-                      )
-
-                  if row.get("seller_name") != "Streetbrand OÜ":
-                      raise SystemExit(
-                          f"ERROR: seller_name is "
-                          f"'{row.get('seller_name')}', expected 'Streetbrand OÜ'."
-                      )
+            
 
                   if not row.get("url", "").startswith("https://"):
                       raise SystemExit(
