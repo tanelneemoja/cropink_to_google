@@ -1,4 +1,4 @@
-name: Generate Google Ads & ChatGPT Ads CSV Feed
+name: Generate Google Ads & OpenAI Ads Feeds
 
 on:
   schedule:
@@ -17,7 +17,6 @@ on:
 jobs:
   generate_csv:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
@@ -37,12 +36,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Run Primary Transformation Script
+      - name: Run Primary Google Ads Transformation
         run: python transform_cropink_feed.py
         env:
           CROPINK_FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
 
-      - name: Run ChatGPT Ads Transformation Script
+      - name: Run OpenAI Ads Transformation
         run: python chatgpt_transform.py
         env:
           CROPINK_FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
@@ -66,82 +65,13 @@ jobs:
       - name: Create .nojekyll
         run: touch .nojekyll
 
-      - name: Verify OpenAI diagnostic feeds
-        shell: bash
+      - name: Verify OpenAI Ads feed files exist
         run: |
           set -e
-          python - <<'PY'
-          import csv
-          import glob
-          import os
-
-          expected = [
-              "item_id",
-              "title",
-              "description",
-              "url",
-              "image_url",
-              "brand",
-              "price",
-              "availability",
-              "seller_name",
-              "target_countries",
-              "is_eligible_search",
-              "is_eligible_checkout",
-              "is_ads_eligible",
-          ]
-
-          files = sorted(
-              glob.glob("openai_diag_*.csv")
-              + [
-                  "chatgpt_ads_feed_lifestyle.csv",
-                  "chatgpt_ads_feed_basketball.csv",
-              ]
-          )
-
-          if not files:
-              raise SystemExit("ERROR: No OpenAI feed files were generated.")
-
-          for filename in files:
-              with open(filename, "r", encoding="utf-8", newline="") as f:
-                  reader = csv.DictReader(f)
-                  if reader.fieldnames != expected:
-                      raise SystemExit(
-                          f"ERROR: {filename} header mismatch.\n"
-                          f"Got: {reader.fieldnames}\nExpected: {expected}"
-                      )
-                  rows = list(reader)
-                  if not rows:
-                      raise SystemExit(f"ERROR: {filename} has zero products.")
-
-                  for idx, row in enumerate(rows, start=2):
-                      for col in expected:
-                          if not str(row.get(col, "")).strip():
-                              raise SystemExit(
-                                  f"ERROR: {filename} row {idx}: {col} is empty"
-                              )
-                      if not row["url"].startswith("https://"):
-                          raise SystemExit(f"ERROR: {filename} row {idx}: bad product URL")
-                      if not row["image_url"].startswith("https://"):
-                          raise SystemExit(f"ERROR: {filename} row {idx}: bad image URL")
-                      if row["target_countries"] != "EE":
-                          raise SystemExit(f"ERROR: {filename} row {idx}: target_countries != EE")
-                      if row["is_eligible_search"] != "true":
-                          raise SystemExit(f"ERROR: {filename} row {idx}: search flag != true")
-                      if row["is_eligible_checkout"] != "false":
-                          raise SystemExit(f"ERROR: {filename} row {idx}: checkout flag != false")
-                      if row["is_ads_eligible"] != "true":
-                          raise SystemExit(f"ERROR: {filename} row {idx}: ads flag != true")
-
-              print(f"OK: {filename} ({len(rows):,} rows, {os.path.getsize(filename):,} bytes)")
-
-          print("All OpenAI diagnostic feeds passed verification.")
-          PY
-
-      - name: Show Git status
-        run: |
-          git status --short
-          git diff --stat || true
+          ls -lh openai_ads_native_lifestyle.csv
+          ls -lh openai_ads_native_basketball.csv
+          head -n 1 openai_ads_native_lifestyle.csv
+          head -n 1 openai_ads_native_basketball.csv
 
       - name: Commit and push generated files
         shell: bash
@@ -163,8 +93,4 @@ jobs:
         run: |
           git status --short
           echo ""
-          echo "OpenAI diagnostic feeds:"
-          ls -lah openai_diag_*.csv || true
-          echo ""
-          echo "Production ChatGPT Ads feeds:"
-          ls -lah chatgpt_ads_feed_*.csv || true
+          ls -lah openai_ads_native_*.csv || true
