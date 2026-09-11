@@ -17,20 +17,20 @@ DEFAULT_CROPINK_FEED_URL = (
     "?id=102&file=cropink_et.xml"
 )
 
-DEFAULT_OUTPUT_CSV_BASE = "openai_ads_feed_v3"
-
 REQUEST_TIMEOUT = 120
 
 SELLER_NAME = "Streetbrand OÜ"
 SELLER_URL = "https://ballzy.eu"
-RETURN_POLICY_URL = "https://ballzy.eu/et/shopping-help#returning"
+RETURN_POLICY_URL = (
+    "https://ballzy.eu/et/shopping-help#returning"
+)
 
 TARGET_COUNTRY = "EE"
 STORE_COUNTRY = "EE"
 
 
 # ============================================================
-# OUTPUT COLUMNS
+# OPENAI NATIVE ADS SCHEMA
 # ============================================================
 
 COLUMNS = [
@@ -38,23 +38,23 @@ COLUMNS = [
     "title",
     "description",
     "url",
-    "image_url",
     "brand",
+    "image_url",
     "price",
     "availability",
     "seller_name",
     "seller_url",
+    "is_eligible_search",
+    "is_eligible_checkout",
     "return_policy",
     "target_countries",
     "store_country",
-    "is_eligible_search",
-    "is_eligible_checkout",
     "is_ads_eligible",
 ]
 
 
 # ============================================================
-# TEXT HELPERS
+# HELPERS
 # ============================================================
 
 def clean_text(text):
@@ -63,29 +63,22 @@ def clean_text(text):
 
     text = str(text)
 
-    # Remove HTML
     text = re.sub(
         r"<[^>]+>",
         " ",
         text,
     )
 
-    # Remove control characters
     text = re.sub(
         r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]",
         " ",
         text,
     )
 
-    # Normalize whitespace
     return " ".join(
         text.split()
     ).strip()
 
-
-# ============================================================
-# URL HELPERS
-# ============================================================
 
 def force_https(url):
     if not url:
@@ -98,17 +91,6 @@ def force_https(url):
 
     return url
 
-
-def is_https(url):
-    return bool(
-        url
-        and url.lower().startswith("https://")
-    )
-
-
-# ============================================================
-# XML HELPERS
-# ============================================================
 
 def get_text(
     item,
@@ -134,7 +116,6 @@ def get_custom_label(
     index,
     namespaces,
 ):
-    # Try without namespace first
     value = get_text(
         item,
         f"custom_label_{index}",
@@ -143,14 +124,13 @@ def get_custom_label(
     if value:
         return clean_text(value)
 
-    # Google namespace fallback
-    value = get_text(
-        item,
-        f"g:custom_label_{index}",
-        namespaces,
+    return clean_text(
+        get_text(
+            item,
+            f"g:custom_label_{index}",
+            namespaces,
+        )
     )
-
-    return clean_text(value)
 
 
 # ============================================================
@@ -250,14 +230,14 @@ def get_business_line(
 
 
 # ============================================================
-# DOWNLOAD SOURCE FEED
+# DOWNLOAD
 # ============================================================
 
 def download_feed(url):
 
     print()
     print("=" * 70)
-    print("DOWNLOADING BALLZY SOURCE FEED")
+    print("DOWNLOADING SOURCE FEED")
     print("=" * 70)
 
     print(f"URL: {url}")
@@ -266,8 +246,9 @@ def download_feed(url):
         url,
         timeout=REQUEST_TIMEOUT,
         headers={
-            "User-Agent": "Ballzy-OpenAI-Ads-Feed/3.0",
-            "Accept": "application/xml,text/xml,*/*",
+            "User-Agent": (
+                "Ballzy-OpenAI-Ads-Feed/4.0"
+            ),
         },
     )
 
@@ -279,93 +260,6 @@ def download_feed(url):
     )
 
     return response.content
-
-
-# ============================================================
-# PRODUCT VALIDATION
-# ============================================================
-
-def validate_product(product):
-
-    required_fields = [
-        "item_id",
-        "title",
-        "description",
-        "url",
-        "image_url",
-        "brand",
-        "price",
-        "availability",
-        "seller_name",
-        "seller_url",
-        "return_policy",
-        "target_countries",
-        "store_country",
-        "is_eligible_search",
-        "is_eligible_checkout",
-        "is_ads_eligible",
-    ]
-
-    for field in required_fields:
-        if not str(
-            product.get(
-                field,
-                "",
-            )
-        ).strip():
-            return False, f"missing_{field}"
-
-    if not is_https(
-        product["url"]
-    ):
-        return False, "bad_product_url"
-
-    if not is_https(
-        product["image_url"]
-    ):
-        return False, "bad_image_url"
-
-    if not is_https(
-        product["seller_url"]
-    ):
-        return False, "bad_seller_url"
-
-    if not is_https(
-        product["return_policy"]
-    ):
-        return False, "bad_return_policy"
-
-    if (
-        product["target_countries"]
-        != "EE"
-    ):
-        return False, "bad_target_country"
-
-    if (
-        product["store_country"]
-        != "EE"
-    ):
-        return False, "bad_store_country"
-
-    if (
-        product["is_eligible_search"]
-        != "true"
-    ):
-        return False, "bad_search_flag"
-
-    if (
-        product["is_eligible_checkout"]
-        != "false"
-    ):
-        return False, "bad_checkout_flag"
-
-    if (
-        product["is_ads_eligible"]
-        != "true"
-    ):
-        return False, "bad_ads_flag"
-
-    return True, ""
 
 
 # ============================================================
@@ -382,25 +276,23 @@ def build_products(xml_data):
         "g": "http://base.google.com/ns/1.0"
     }
 
-    products_by_category = {
+    products = {
         "lifestyle": [],
         "basketball": [],
     }
 
-    total_items = 0
-    ignored_items = 0
-    invalid_items = 0
-    duplicate_ids = 0
-
     seen_ids = set()
 
-    rejection_reasons = {}
+    total = 0
+    ignored = 0
+    invalid = 0
+    duplicates = 0
 
     for item in root.findall(
         ".//item"
     ):
 
-        total_items += 1
+        total += 1
 
         business_line = get_business_line(
             item,
@@ -408,7 +300,7 @@ def build_products(xml_data):
         )
 
         if business_line is None:
-            ignored_items += 1
+            ignored += 1
             continue
 
         item_id = clean_text(
@@ -420,109 +312,116 @@ def build_products(xml_data):
         )
 
         if item_id in seen_ids:
-            duplicate_ids += 1
+            duplicates += 1
             continue
-
-        title = clean_text(
-            get_text(
-                item,
-                "g:title",
-                namespaces,
-            )
-        )
-
-        description = clean_text(
-            get_text(
-                item,
-                "g:description",
-                namespaces,
-            )
-        )
-
-        url = force_https(
-            get_text(
-                item,
-                "g:link",
-                namespaces,
-            )
-        )
-
-        image_url = force_https(
-            get_text(
-                item,
-                "g:image_link",
-                namespaces,
-            )
-        )
-
-        brand = clean_text(
-            get_text(
-                item,
-                "g:brand",
-                namespaces,
-            )
-        )
-
-        price = parse_price(
-            item.find(
-                "g:price",
-                namespaces,
-            )
-        )
-
-        availability = parse_availability(
-            item.find(
-                "g:availability",
-                namespaces,
-            )
-        )
 
         product = {
             "item_id": item_id,
-            "title": title,
-            "description": description,
-            "url": url,
-            "image_url": image_url,
-            "brand": brand,
-            "price": price,
-            "availability": availability,
+
+            "title": clean_text(
+                get_text(
+                    item,
+                    "g:title",
+                    namespaces,
+                )
+            ),
+
+            "description": clean_text(
+                get_text(
+                    item,
+                    "g:description",
+                    namespaces,
+                )
+            ),
+
+            "url": force_https(
+                get_text(
+                    item,
+                    "g:link",
+                    namespaces,
+                )
+            ),
+
+            "brand": clean_text(
+                get_text(
+                    item,
+                    "g:brand",
+                    namespaces,
+                )
+            ),
+
+            "image_url": force_https(
+                get_text(
+                    item,
+                    "g:image_link",
+                    namespaces,
+                )
+            ),
+
+            "price": parse_price(
+                item.find(
+                    "g:price",
+                    namespaces,
+                )
+            ),
+
+            "availability": (
+                parse_availability(
+                    item.find(
+                        "g:availability",
+                        namespaces,
+                    )
+                )
+            ),
 
             "seller_name": SELLER_NAME,
             "seller_url": SELLER_URL,
-            "return_policy": RETURN_POLICY_URL,
-
-            "target_countries": TARGET_COUNTRY,
-            "store_country": STORE_COUNTRY,
 
             "is_eligible_search": "true",
             "is_eligible_checkout": "false",
+
+            "return_policy": (
+                RETURN_POLICY_URL
+            ),
+
+            "target_countries": (
+                TARGET_COUNTRY
+            ),
+
+            "store_country": (
+                STORE_COUNTRY
+            ),
+
             "is_ads_eligible": "true",
         }
 
-        valid, reason = validate_product(
-            product
-        )
+        # All fields required for this feed version.
+        if not all(
+            str(
+                product[column]
+            ).strip()
+            for column in COLUMNS
+        ):
+            invalid += 1
+            continue
 
-        if not valid:
-            invalid_items += 1
+        if not product[
+            "url"
+        ].startswith("https://"):
+            invalid += 1
+            continue
 
-            rejection_reasons[
-                reason
-            ] = (
-                rejection_reasons.get(
-                    reason,
-                    0,
-                )
-                + 1
-            )
-
+        if not product[
+            "image_url"
+        ].startswith("https://"):
+            invalid += 1
             continue
 
         seen_ids.add(
             item_id
         )
 
-        products_by_category[
+        products[
             business_line
         ].append(
             product
@@ -530,65 +429,43 @@ def build_products(xml_data):
 
     print()
     print("=" * 70)
-    print("PROCESSING SUMMARY")
+    print("SUMMARY")
     print("=" * 70)
 
     print(
-        f"Total XML items:       "
-        f"{total_items:,}"
+        f"Total items:          {total:,}"
     )
 
     print(
-        f"Ignored categories:    "
-        f"{ignored_items:,}"
+        f"Ignored:              {ignored:,}"
     )
 
     print(
-        f"Duplicate item IDs:    "
-        f"{duplicate_ids:,}"
+        f"Invalid:              {invalid:,}"
     )
 
     print(
-        f"Invalid products:      "
-        f"{invalid_items:,}"
+        f"Duplicates:           {duplicates:,}"
     )
 
     print(
-        f"Valid Lifestyle:       "
-        f"{len(products_by_category['lifestyle']):,}"
+        f"Lifestyle:            "
+        f"{len(products['lifestyle']):,}"
     )
 
     print(
-        f"Valid Basketball:      "
-        f"{len(products_by_category['basketball']):,}"
+        f"Basketball:           "
+        f"{len(products['basketball']):,}"
     )
 
-    if rejection_reasons:
-
-        print()
-        print(
-            "Rejection reasons:"
-        )
-
-        for reason, count in sorted(
-            rejection_reasons.items(),
-            key=lambda x: x[1],
-            reverse=True,
-        ):
-
-            print(
-                f"  {reason}: "
-                f"{count:,}"
-            )
-
-    return products_by_category
+    return products
 
 
 # ============================================================
-# SAVE CSV
+# SAVE TAB-DELIMITED TXT
 # ============================================================
 
-def save_csv(
+def save_txt(
     products,
     filename,
 ):
@@ -598,10 +475,14 @@ def save_csv(
         columns=COLUMNS,
     )
 
+    # IMPORTANT:
+    # OpenAI native feed diagnostic:
+    # UTF-8 + TAB-DELIMITED TXT
     df.to_csv(
         filename,
         index=False,
         encoding="utf-8",
+        sep="\t",
         quoting=csv.QUOTE_MINIMAL,
         doublequote=True,
         lineterminator="\n",
@@ -609,53 +490,40 @@ def save_csv(
 
     print()
     print("=" * 70)
-    print(
-        f"SAVED {filename}"
-    )
+    print(f"SAVED {filename}")
     print("=" * 70)
 
     print(
-        f"Products: "
+        f"Rows: "
         f"{len(df):,}"
     )
 
     print(
-        f"File size: "
+        f"Size: "
         f"{os.path.getsize(filename):,} bytes"
     )
 
     print()
-    print("Header:")
+    print(
+        "HEADER:"
+    )
 
     print(
-        ",".join(
+        "\t".join(
             df.columns
         )
     )
 
-    if len(df) > 0:
-
-        print()
-        print(
-            "First product:"
-        )
-
-        for column in COLUMNS:
-
-            print(
-                f"  {column}: "
-                f"{df.iloc[0][column]}"
-            )
-
 
 # ============================================================
-# VERIFY OUTPUT
+# VERIFY TXT
 # ============================================================
 
-def verify_csv(filename):
+def verify_txt(filename):
 
     df = pd.read_csv(
         filename,
+        sep="\t",
         dtype=str,
         keep_default_na=False,
     )
@@ -666,32 +534,27 @@ def verify_csv(filename):
 
         raise RuntimeError(
             f"{filename}: "
-            f"column structure mismatch"
+            "header mismatch"
         )
 
     if len(df) == 0:
 
         raise RuntimeError(
-            f"{filename}: "
-            f"feed contains zero products"
+            f"{filename}: zero rows"
         )
 
-    duplicate_count = (
+    if (
         df["item_id"]
         .duplicated()
-        .sum()
-    )
-
-    if duplicate_count:
+        .any()
+    ):
 
         raise RuntimeError(
-            f"{filename}: "
-            f"{duplicate_count} duplicate IDs"
+            f"{filename}: duplicate IDs"
         )
 
     print(
-        f"Verified: "
-        f"{filename}"
+        f"Verified: {filename}"
     )
 
 
@@ -703,17 +566,12 @@ def main():
 
     print()
     print("=" * 70)
-    print("OPENAI ADS BALLZY FEED V3")
+    print("OPENAI ADS NATIVE TSV FEED")
     print("=" * 70)
 
     feed_url = os.environ.get(
         "CROPINK_FEED_URL",
         DEFAULT_CROPINK_FEED_URL,
-    )
-
-    output_base = os.environ.get(
-        "OUTPUT_CSV_BASE",
-        DEFAULT_OUTPUT_CSV_BASE,
     )
 
     data = download_feed(
@@ -724,22 +582,23 @@ def main():
         data
     )
 
+    # Brand-new filenames = no old feed cache.
     lifestyle_file = (
-        f"{output_base}_lifestyle.csv"
+        "openai_native_lifestyle.txt"
     )
 
     basketball_file = (
-        f"{output_base}_basketball.csv"
+        "openai_native_basketball.txt"
     )
 
-    save_csv(
+    save_txt(
         products[
             "lifestyle"
         ],
         lifestyle_file,
     )
 
-    save_csv(
+    save_txt(
         products[
             "basketball"
         ],
@@ -748,14 +607,14 @@ def main():
 
     print()
     print("=" * 70)
-    print("VERIFYING FILES")
+    print("VERIFY")
     print("=" * 70)
 
-    verify_csv(
+    verify_txt(
         lifestyle_file
     )
 
-    verify_csv(
+    verify_txt(
         basketball_file
     )
 
@@ -764,26 +623,20 @@ def main():
     print("DONE")
     print("=" * 70)
 
-    print()
-    print(
-        "Lifestyle:"
-    )
-
-    print(
+    base = (
         "https://tanelneemoja.github.io/"
         "cropink_to_google/"
-        "openai_ads_feed_v3_lifestyle.csv"
     )
 
     print()
     print(
-        "Basketball:"
+        base
+        + lifestyle_file
     )
 
     print(
-        "https://tanelneemoja.github.io/"
-        "cropink_to_google/"
-        "openai_ads_feed_v3_basketball.csv"
+        base
+        + basketball_file
     )
 
 
@@ -794,7 +647,6 @@ def main():
 if __name__ == "__main__":
 
     try:
-
         main()
 
     except Exception as error:
