@@ -1,2 +1,2 @@
-item_id,title,description,url,brand,seller_name,image_url,availability,price,is_ads_eligible
-CZ5478-001-7-CNF,Nike Victori One Shower Slide,Nike men's shower slides,https://ballzy.eu/et/product/nike-victori-one-shower-slide-cz5478-001-7-cnf,Nike,Ballzy,https://backend.ballzy.eu/media/catalog/product/n/i/nike-nike-victori-one-shower-slide-must-2mnc.jpg,in_stock,29.00 EUR,true
+item_id,title,description,url,image_url,brand,price,availability,seller_name,target_countries,is_eligible_search,is_eligible_checkout,is_ads_eligible
+SX7622_100_S_CNF,U nk elite crew 132,Nike basketball socks.,https://ballzy.eu/et/product/u-nk-elite-crew-132-sx7622-100-s-cnf,https://backend.ballzy.eu/media/catalog/product/n/i/nike-u-nk-elite-crew-132-valge-89e1.jpg,Nike,17.00 EUR,in_stock,Streetbrand OÜ,EE,true,false,true
