@@ -289,28 +289,64 @@ jobs:
           git diff --stat || true
 
 
-      # ============================================================
+           # ============================================================
       # 13. COMMIT AND PUSH GENERATED FILES
       # ============================================================
 
       - name: Commit and push generated files
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          file_pattern: |
-            .nojekyll
-            *.csv
-            *.csv.gz
-            *.txt
+        shell: bash
+        run: |
+          set -e
 
-          commit_message: "Automated: Update product feeds"
+          echo ""
+          echo "============================================================"
+          echo "COMMITTING GENERATED FEEDS"
+          echo "============================================================"
 
-          commit_author: "GitHub Actions <action@github.com>"
+          echo ""
+          echo "Git status before add:"
+          git status --short
 
-          commit_user_name: "GitHub Actions"
+          echo ""
+          echo "Adding generated files..."
 
-          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
 
-          push_options: "--force-with-lease"
+          echo ""
+          echo "Git status after add:"
+          git status --short
+
+          echo ""
+          echo "Checking whether there are changes..."
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          echo ""
+          echo "Changes to be committed:"
+          git diff --cached --stat
+
+          echo ""
+          echo "Creating commit..."
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "Automated: Update product feeds"
+
+          echo ""
+          echo "Pushing commit to GitHub..."
+
+          git push
+
+          echo ""
+          echo "============================================================"
+          echo "PUSH SUCCESSFUL"
+          echo "============================================================"
+
+          git status --short
 
 
       # ============================================================
