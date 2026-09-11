@@ -10,11 +10,8 @@ def clean_text(text):
     """Strips HTML tags and normalizes whitespace for conversational LLM matching."""
     if not text:
         return ""
-    # Strip HTML tags
     clean = re.sub(r"<[^>]+>", " ", text)
-    # Normalize whitespace
-    clean = " ".join(clean.split())
-    return clean
+    return " ".join(clean.split())
 
 
 def parse_price_value(price_element):
@@ -40,13 +37,13 @@ def parse_availability(availability_element):
             return "pre_order"
         elif val in ["backorder", "back_order"]:
             return "backorder"
-    return "in_stock"  # Default assumption if present in feed
+    return "in_stock"
 
 
 def transform_cropink_to_chatgpt_ads_csv(
     cropink_url, output_csv_base="chatgpt_ads_feed"
 ):
-    """Fetches Cropink XML feed and maps it into OpenAI/ChatGPT Ads CSV specifications."""
+    """Fetches Cropink XML feed and maps it into compressed OpenAI/ChatGPT Ads CSV.GZ files."""
     print(f"Fetching Cropink feed from: {cropink_url}")
     try:
         response = requests.get(cropink_url)
@@ -66,12 +63,10 @@ def transform_cropink_to_chatgpt_ads_csv(
         return False
 
     products_by_category = {"basketball": [], "lifestyle": []}
-
     namespaces = {"g": "http://base.google.com/ns/1.0"}
 
     # Process XML items
     for item in root.findall(".//item"):
-        # Check custom_label_0 for target categorization
         custom_label_0 = item.find("custom_label_0")
         category_key = None
         if custom_label_0 is not None and custom_label_0.text:
@@ -82,7 +77,6 @@ def transform_cropink_to_chatgpt_ads_csv(
                 category_key = "lifestyle"
 
         if category_key:
-            # Schema according to OpenAI Product Feed specifications
             product_data = {
                 "item_id": "",
                 "title": "",
@@ -95,46 +89,38 @@ def transform_cropink_to_chatgpt_ads_csv(
                 "availability": "in_stock",
                 "google_product_category": "",
                 "product_type": "",
-                "is_ads_eligible": "true",  # Required flag for OpenAI Ads ingestion
-                "enable_search": "true",  # Eligibility for ChatGPT Shopping search
-                "ads_metadata": "",  # Contextual tags/keywords stringified
+                "is_ads_eligible": "true",
+                "enable_search": "true",
+                "ads_metadata": "",
             }
 
-            # Product ID
             g_id = item.find("g:id", namespaces=namespaces)
             if g_id is not None and g_id.text:
                 product_data["item_id"] = g_id.text.strip()
 
-            # Title
             g_title = item.find("g:title", namespaces=namespaces)
             if g_title is not None and g_title.text:
                 product_data["title"] = clean_text(g_title.text)
 
-            # URL / Link
             g_link = item.find("g:link", namespaces=namespaces)
             if g_link is not None and g_link.text:
                 product_data["url"] = g_link.text.strip()
 
-            # Main Image URL
             g_image_link = item.find("g:image_link", namespaces=namespaces)
             if g_image_link is not None and g_image_link.text:
                 product_data["image_url"] = g_image_link.text.strip()
 
-            # Description
             g_description = item.find("g:description", namespaces=namespaces)
             if g_description is not None and g_description.text:
                 product_data["description"] = clean_text(g_description.text)
 
-            # Brand
             g_brand = item.find("g:brand", namespaces=namespaces)
             if g_brand is not None and g_brand.text:
                 product_data["brand"] = g_brand.text.strip()
 
-            # Availability
             g_availability = item.find("g:availability", namespaces=namespaces)
             product_data["availability"] = parse_availability(g_availability)
 
-            # Category / Types
             g_product_category = item.find(
                 "g:google_product_category", namespaces=namespaces
             )
@@ -147,14 +133,12 @@ def transform_cropink_to_chatgpt_ads_csv(
             if g_product_type is not None and g_product_type.text:
                 product_data["product_type"] = g_product_type.text.strip()
 
-            # Price & Sale Price
             g_price = item.find("g:price", namespaces=namespaces)
             product_data["price"] = parse_price_value(g_price)
 
             g_sale_price = item.find("g:sale_price", namespaces=namespaces)
             product_data["sale_price"] = parse_price_value(g_sale_price)
 
-            # Collect contextual keywords into ads_metadata (useful for ChatGPT Ad targeting)
             meta_attributes = []
             if product_data["brand"]:
                 meta_attributes.append(f"brand:{product_data['brand']}")
@@ -169,10 +153,8 @@ def transform_cropink_to_chatgpt_ads_csv(
                     meta_attributes.append(custom_label.text.strip())
 
             product_data["ads_metadata"] = ";".join(meta_attributes)
-
             products_by_category[category_key].append(product_data)
 
-    # Column ordering according to standard ChatGPT product feed specifications
     chatgpt_columns_order = [
         "item_id",
         "title",
@@ -193,26 +175,28 @@ def transform_cropink_to_chatgpt_ads_csv(
     success = True
     for category, product_list in products_by_category.items():
         if product_list:
-            output_csv_file = f"{output_csv_base}_{category}.csv"
+            # Output filename ending in .csv.gz
+            output_gz_file = f"{output_csv_base}_{category}.csv.gz"
             df = pd.DataFrame(product_list)
             df = df.reindex(columns=chatgpt_columns_order)
 
             print(
-                f"Saving {len(product_list)} items for {category.capitalize()} to {output_csv_file}..."
+                f"Saving {len(product_list)} items for {category.capitalize()} to {output_gz_file}..."
             )
             try:
-                # UTF-8 encoding without BOM is required for OpenAI feed ingestion
+                # Compression parameter creates a native gzip stream directly
                 df.to_csv(
-                    output_csv_file,
+                    output_gz_file,
                     index=False,
                     encoding="utf-8",
                     sep=",",
                     doublequote=True,
                     quoting=csv.QUOTE_MINIMAL,
+                    compression="gzip",
                 )
-                print(f"Successfully generated: {output_csv_file}")
+                print(f"Successfully generated: {output_gz_file}")
             except IOError as e:
-                print(f"Error saving CSV: {e}")
+                print(f"Error saving compressed CSV: {e}")
                 success = False
         else:
             print(f"No products found for '{category.capitalize()}'.")
