@@ -9,7 +9,7 @@ from collections import Counter
 import pandas as pd
 import requests
 
-
+ 
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -19,7 +19,7 @@ DEFAULT_CROPINK_FEED_URL = (
     "?id=102&file=cropink_et.xml"
 )
 
-DEFAULT_OUTPUT_CSV_BASE = "chatgpt_ads_feed"
+DEFAULT_OUTPUT_CSV_BASE = "chatgpt_ads_feed1"
 
 REQUEST_TIMEOUT = 120
 
