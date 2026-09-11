@@ -1,8 +1,10 @@
 import csv
+import json
 import os
 import re
 import sys
 import xml.etree.ElementTree as ET
+from collections import Counter
 
 import pandas as pd
 import requests
@@ -18,7 +20,11 @@ DEFAULT_CROPINK_FEED_URL = (
 )
 
 DEFAULT_OUTPUT_CSV_BASE = "chatgpt_ads_feed"
+
 REQUEST_TIMEOUT = 120
+
+SELLER_NAME = "Streetbrand OÜ"
+TARGET_COUNTRY = "EE"
 
 
 # ============================================================
@@ -39,12 +45,24 @@ COLUMNS = [
     "is_eligible_search",
     "is_eligible_checkout",
     "is_ads_eligible",
-    "product_type",
+    "product_category",
+    "ads_metadata",
 ]
 
 
 # ============================================================
-# HELPERS
+# FIELD LIMITS
+# ============================================================
+
+MAX_ITEM_ID = 100
+MAX_TITLE = 150
+MAX_DESCRIPTION = 5000
+MAX_BRAND = 70
+MAX_SELLER_NAME = 70
+
+
+# ============================================================
+# TEXT HELPERS
 # ============================================================
 
 def clean_text(text):
@@ -70,6 +88,19 @@ def clean_text(text):
     ).strip()
 
 
+def truncate_text(text, max_length):
+    text = clean_text(text)
+
+    if len(text) <= max_length:
+        return text
+
+    return text[:max_length].rstrip()
+
+
+# ============================================================
+# URL HELPERS
+# ============================================================
+
 def force_https(url):
     if not url:
         return ""
@@ -81,6 +112,17 @@ def force_https(url):
 
     return url
 
+
+def valid_https_url(url):
+    return bool(
+        url
+        and url.startswith("https://")
+    )
+
+
+# ============================================================
+# XML HELPERS
+# ============================================================
 
 def get_text(
     item,
@@ -101,6 +143,28 @@ def get_text(
     return ""
 
 
+def get_custom_label(
+    item,
+    index,
+    namespaces,
+):
+    value = get_text(
+        item,
+        f"custom_label_{index}",
+    )
+
+    if value:
+        return clean_text(value)
+
+    return clean_text(
+        get_text(
+            item,
+            f"g:custom_label_{index}",
+            namespaces,
+        )
+    )
+
+
 # ============================================================
 # PRICE
 # ============================================================
@@ -113,7 +177,9 @@ def parse_price(element):
         return ""
 
     value = " ".join(
-        element.text.strip().split()
+        element.text
+        .strip()
+        .split()
     )
 
     match = re.match(
@@ -130,6 +196,24 @@ def parse_price(element):
     return f"{amount} {currency}"
 
 
+def parse_money(value):
+    if not value:
+        return None
+
+    match = re.match(
+        r"^([0-9]+(?:\.[0-9]+)?) ([A-Z]{3})$",
+        value.strip(),
+    )
+
+    if not match:
+        return None
+
+    return (
+        float(match.group(1)),
+        match.group(2),
+    )
+
+
 # ============================================================
 # AVAILABILITY
 # ============================================================
@@ -141,18 +225,19 @@ def parse_availability(element):
     ):
         return "in_stock"
 
-    value = element.text.strip().lower()
+    value = (
+        element.text
+        .strip()
+        .lower()
+    )
 
     mapping = {
         "in stock": "in_stock",
         "in_stock": "in_stock",
-
         "out of stock": "out_of_stock",
         "out_of_stock": "out_of_stock",
-
         "preorder": "pre_order",
         "pre_order": "pre_order",
-
         "backorder": "backorder",
         "back_order": "backorder",
     }
@@ -164,31 +249,23 @@ def parse_availability(element):
 
 
 # ============================================================
-# CATEGORY / BUSINESS LINE
+# BUSINESS LINE
 # ============================================================
 
-def get_business_line(item):
-    """
-    Reads custom_label_0 and splits products into:
-    - lifestyle
-    - basketball
-    """
-
-    element = item.find(
-        "custom_label_0"
+def get_business_line(
+    item,
+    namespaces,
+):
+    label = get_custom_label(
+        item,
+        0,
+        namespaces,
     )
 
-    if (
-        element is None
-        or not element.text
-    ):
+    if not label:
         return None
 
-    value = (
-        element.text
-        .strip()
-        .lower()
-    )
+    value = label.lower()
 
     if "lifestyle" in value:
         return "lifestyle"
@@ -200,7 +277,38 @@ def get_business_line(item):
 
 
 # ============================================================
-# DOWNLOAD
+# ADS METADATA
+# ============================================================
+
+def build_ads_metadata(
+    business_line,
+    brand,
+    product_category,
+):
+    metadata = {}
+
+    if business_line:
+        metadata["business_line"] = (
+            business_line
+        )
+
+    if brand:
+        metadata["brand"] = brand
+
+    if product_category:
+        metadata["product_category"] = (
+            product_category
+        )
+
+    return json.dumps(
+        metadata,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+
+
+# ============================================================
+# DOWNLOAD FEED
 # ============================================================
 
 def download_feed(url):
@@ -215,7 +323,9 @@ def download_feed(url):
         url,
         timeout=REQUEST_TIMEOUT,
         headers={
-            "User-Agent": "Ballzy-OpenAI-Feed/1.0",
+            "User-Agent": (
+                "Ballzy-OpenAI-Feed/1.0"
+            ),
         },
     )
 
@@ -230,6 +340,191 @@ def download_feed(url):
 
 
 # ============================================================
+# VALIDATE PRODUCT
+# ============================================================
+
+def validate_product(product):
+    errors = []
+
+    required_fields = [
+        "item_id",
+        "title",
+        "description",
+        "url",
+        "image_url",
+        "brand",
+        "price",
+        "availability",
+        "seller_name",
+        "target_countries",
+        "is_eligible_search",
+        "is_eligible_checkout",
+        "is_ads_eligible",
+    ]
+
+    for field in required_fields:
+        if not str(
+            product.get(field, "")
+        ).strip():
+            errors.append(
+                f"missing_{field}"
+            )
+
+    if len(
+        product["item_id"]
+    ) > MAX_ITEM_ID:
+        errors.append(
+            "item_id_too_long"
+        )
+
+    if len(
+        product["title"]
+    ) > MAX_TITLE:
+        errors.append(
+            "title_too_long"
+        )
+
+    if len(
+        product["description"]
+    ) > MAX_DESCRIPTION:
+        errors.append(
+            "description_too_long"
+        )
+
+    if len(
+        product["brand"]
+    ) > MAX_BRAND:
+        errors.append(
+            "brand_too_long"
+        )
+
+    if len(
+        product["seller_name"]
+    ) > MAX_SELLER_NAME:
+        errors.append(
+            "seller_name_too_long"
+        )
+
+    if not valid_https_url(
+        product["url"]
+    ):
+        errors.append(
+            "invalid_url"
+        )
+
+    if not valid_https_url(
+        product["image_url"]
+    ):
+        errors.append(
+            "invalid_image_url"
+        )
+
+    valid_availability = {
+        "in_stock",
+        "out_of_stock",
+        "pre_order",
+        "backorder",
+    }
+
+    if (
+        product["availability"]
+        not in valid_availability
+    ):
+        errors.append(
+            "invalid_availability"
+        )
+
+    money = parse_money(
+        product["price"]
+    )
+
+    if not money:
+        errors.append(
+            "invalid_price"
+        )
+    else:
+        amount, _ = money
+
+        if amount <= 0:
+            errors.append(
+                "price_not_positive"
+            )
+
+    if (
+        product["target_countries"]
+        != TARGET_COUNTRY
+    ):
+        errors.append(
+            "invalid_target_country"
+        )
+
+    if (
+        product["is_eligible_search"]
+        != "true"
+    ):
+        errors.append(
+            "invalid_search_flag"
+        )
+
+    if (
+        product[
+            "is_eligible_checkout"
+        ]
+        != "false"
+    ):
+        errors.append(
+            "invalid_checkout_flag"
+        )
+
+    if (
+        product["is_ads_eligible"]
+        != "true"
+    ):
+        errors.append(
+            "invalid_ads_flag"
+        )
+
+    try:
+        metadata = json.loads(
+            product["ads_metadata"]
+        )
+
+        if not isinstance(
+            metadata,
+            dict,
+        ):
+            errors.append(
+                "ads_metadata_not_object"
+            )
+
+        else:
+            for key, value in metadata.items():
+
+                if not isinstance(
+                    key,
+                    str,
+                ):
+                    errors.append(
+                        "metadata_key_not_string"
+                    )
+
+                if not isinstance(
+                    value,
+                    str,
+                ):
+                    errors.append(
+                        "metadata_value_not_string"
+                    )
+
+    except Exception:
+        errors.append(
+            "invalid_ads_metadata"
+        )
+
+    return errors
+
+
+# ============================================================
 # BUILD PRODUCTS
 # ============================================================
 
@@ -239,7 +534,9 @@ def build_products(xml_data):
     )
 
     namespaces = {
-        "g": "http://base.google.com/ns/1.0"
+        "g": (
+            "http://base.google.com/ns/1.0"
+        )
     }
 
     products_by_category = {
@@ -247,9 +544,15 @@ def build_products(xml_data):
         "basketball": [],
     }
 
+    rejection_counts = Counter()
+
+    rejection_examples = []
+
+    seen_ids = set()
+
     total_items = 0
-    ignored_items = 0
-    invalid_items = 0
+    ignored_categories = 0
+    duplicate_ids = 0
 
     for item in root.findall(
         ".//item"
@@ -258,35 +561,48 @@ def build_products(xml_data):
         total_items += 1
 
         business_line = get_business_line(
-            item
+            item,
+            namespaces,
         )
 
         if business_line is None:
-            ignored_items += 1
+            ignored_categories += 1
             continue
 
-        item_id = clean_text(
+        item_id = truncate_text(
             get_text(
                 item,
                 "g:id",
                 namespaces,
-            )
+            ),
+            MAX_ITEM_ID,
         )
 
-        title = clean_text(
+        if item_id in seen_ids:
+            duplicate_ids += 1
+
+            rejection_counts[
+                "duplicate_item_id"
+            ] += 1
+
+            continue
+
+        title = truncate_text(
             get_text(
                 item,
                 "g:title",
                 namespaces,
-            )
+            ),
+            MAX_TITLE,
         )
 
-        description = clean_text(
+        description = truncate_text(
             get_text(
                 item,
                 "g:description",
                 namespaces,
-            )
+            ),
+            MAX_DESCRIPTION,
         )
 
         url = force_https(
@@ -305,12 +621,13 @@ def build_products(xml_data):
             )
         )
 
-        brand = clean_text(
+        brand = truncate_text(
             get_text(
                 item,
                 "g:brand",
                 namespaces,
-            )
+            ),
+            MAX_BRAND,
         )
 
         price = parse_price(
@@ -327,19 +644,28 @@ def build_products(xml_data):
             )
         )
 
-        # ---------------------------------------------
-        # Product type comes from:
-        #
+        # Source:
         # <g:google_product_category>
         # <![CDATA[ Men's Socks ]]>
         # </g:google_product_category>
-        # ---------------------------------------------
 
-        product_type = clean_text(
+        product_category = clean_text(
             get_text(
                 item,
                 "g:google_product_category",
                 namespaces,
+            )
+        )
+
+        ads_metadata = (
+            build_ads_metadata(
+                business_line=(
+                    business_line
+                ),
+                brand=brand,
+                product_category=(
+                    product_category
+                ),
             )
         )
 
@@ -353,51 +679,50 @@ def build_products(xml_data):
             "price": price,
             "availability": availability,
 
-            "seller_name": "Streetbrand OÜ",
-            "target_countries": "EE",
+            "seller_name": SELLER_NAME,
+            "target_countries": (
+                TARGET_COUNTRY
+            ),
             "is_eligible_search": "true",
             "is_eligible_checkout": "false",
             "is_ads_eligible": "true",
 
-            "product_type": product_type,
+            "product_category": (
+                product_category
+            ),
+
+            "ads_metadata": (
+                ads_metadata
+            ),
         }
 
-        required_fields = [
-            "item_id",
-            "title",
-            "description",
-            "url",
-            "image_url",
-            "brand",
-            "price",
-            "availability",
-            "seller_name",
-            "target_countries",
-            "is_eligible_search",
-            "is_eligible_checkout",
-            "is_ads_eligible",
-        ]
+        errors = validate_product(
+            product
+        )
 
-        if not all(
-            str(
-                product[field]
-            ).strip()
-            for field in required_fields
-        ):
-            invalid_items += 1
+        if errors:
+            for error in errors:
+                rejection_counts[
+                    error
+                ] += 1
+
+            if len(
+                rejection_examples
+            ) < 25:
+
+                rejection_examples.append(
+                    {
+                        "item_id": item_id,
+                        "title": title,
+                        "errors": errors,
+                    }
+                )
+
             continue
 
-        if not url.startswith(
-            "https://"
-        ):
-            invalid_items += 1
-            continue
-
-        if not image_url.startswith(
-            "https://"
-        ):
-            invalid_items += 1
-            continue
+        seen_ids.add(
+            item_id
+        )
 
         products_by_category[
             business_line
@@ -411,29 +736,77 @@ def build_products(xml_data):
     print("=" * 70)
 
     print(
-        f"Total XML items:     "
+        f"Total XML items:       "
         f"{total_items:,}"
     )
 
     print(
-        f"Ignored categories:  "
-        f"{ignored_items:,}"
+        f"Ignored categories:    "
+        f"{ignored_categories:,}"
     )
 
     print(
-        f"Invalid products:    "
-        f"{invalid_items:,}"
+        f"Duplicate item IDs:    "
+        f"{duplicate_ids:,}"
     )
 
     print(
-        f"Lifestyle products:  "
+        f"Valid Lifestyle:       "
         f"{len(products_by_category['lifestyle']):,}"
     )
 
     print(
-        f"Basketball products: "
+        f"Valid Basketball:      "
         f"{len(products_by_category['basketball']):,}"
     )
+
+    print()
+    print("=" * 70)
+    print("REJECTION SUMMARY")
+    print("=" * 70)
+
+    if rejection_counts:
+
+        for reason, count in (
+            rejection_counts
+            .most_common()
+        ):
+
+            print(
+                f"{reason}: "
+                f"{count:,}"
+            )
+
+    else:
+
+        print(
+            "No rejected products."
+        )
+
+    if rejection_examples:
+
+        print()
+        print("=" * 70)
+        print("FIRST REJECTION EXAMPLES")
+        print("=" * 70)
+
+        for example in rejection_examples:
+
+            print()
+            print(
+                f"item_id: "
+                f"{example['item_id']}"
+            )
+
+            print(
+                f"title: "
+                f"{example['title']}"
+            )
+
+            print(
+                f"errors: "
+                f"{', '.join(example['errors'])}"
+            )
 
     return products_by_category
 
@@ -446,6 +819,7 @@ def save_csv(
     products,
     filename,
 ):
+
     df = pd.DataFrame(
         products,
         columns=COLUMNS,
@@ -456,6 +830,7 @@ def save_csv(
         index=False,
         encoding="utf-8",
         quoting=csv.QUOTE_MINIMAL,
+        doublequote=True,
         lineterminator="\n",
     )
 
@@ -464,9 +839,9 @@ def save_csv(
     )
 
     print()
-    print(
-        f"Saved: {filename}"
-    )
+    print("=" * 70)
+    print(f"SAVED {filename}")
+    print("=" * 70)
 
     print(
         f"Products: "
@@ -479,9 +854,7 @@ def save_csv(
     )
 
     print()
-    print(
-        "Header:"
-    )
+    print("Header:")
 
     print(
         ",".join(
@@ -490,21 +863,23 @@ def save_csv(
     )
 
     if len(df) > 0:
-        print()
-        print(
-            "First product:"
-        )
 
-        print(
-            df.iloc[0].to_dict()
-        )
+        print()
+        print("First product:")
+
+        for key in COLUMNS:
+            print(
+                f"  {key}: "
+                f"{df.iloc[0][key]}"
+            )
 
 
 # ============================================================
-# VERIFY CSV
+# VERIFY OUTPUT
 # ============================================================
 
 def verify_csv(filename):
+
     df = pd.read_csv(
         filename,
         dtype=str,
@@ -516,17 +891,31 @@ def verify_csv(filename):
     ) != COLUMNS:
 
         raise RuntimeError(
-            f"Column structure mismatch in {filename}"
+            f"{filename}: "
+            f"column structure mismatch"
         )
 
     if len(df) == 0:
 
         raise RuntimeError(
-            f"No products in {filename}"
+            f"{filename}: "
+            f"feed contains zero products"
         )
 
-    # Required columns must not be empty
-    required_fields = [
+    duplicate_count = (
+        df["item_id"]
+        .duplicated()
+        .sum()
+    )
+
+    if duplicate_count:
+
+        raise RuntimeError(
+            f"{filename}: "
+            f"{duplicate_count} duplicate IDs"
+        )
+
+    for column in [
         "item_id",
         "title",
         "description",
@@ -540,62 +929,27 @@ def verify_csv(filename):
         "is_eligible_search",
         "is_eligible_checkout",
         "is_ads_eligible",
-    ]
+    ]:
 
-    for field in required_fields:
-
-        empty = (
-            df[field]
+        empty_count = (
+            df[column]
             .astype(str)
             .str.strip()
             .eq("")
             .sum()
         )
 
-        if empty:
+        if empty_count:
 
             raise RuntimeError(
                 f"{filename}: "
-                f"{field} has "
-                f"{empty} empty values"
+                f"{column} has "
+                f"{empty_count} empty values"
             )
 
-    bad_urls = df[
-        ~df["url"].str.startswith(
-            "https://"
-        )
-    ]
-
-    if len(
-        bad_urls
-    ) > 0:
-
-        raise RuntimeError(
-            f"{filename}: "
-            f"{len(bad_urls)} "
-            f"non-HTTPS URLs"
-        )
-
-    bad_images = df[
-        ~df[
-            "image_url"
-        ].str.startswith(
-            "https://"
-        )
-    ]
-
-    if len(
-        bad_images
-    ) > 0:
-
-        raise RuntimeError(
-            f"{filename}: "
-            f"{len(bad_images)} "
-            f"non-HTTPS image URLs"
-        )
-
     print(
-        f"Verified: {filename}"
+        f"Verified successfully: "
+        f"{filename}"
     )
 
 
@@ -624,7 +978,7 @@ def main():
         feed_url
     )
 
-    products_by_category = build_products(
+    products = build_products(
         data
     )
 
@@ -637,14 +991,14 @@ def main():
     )
 
     save_csv(
-        products_by_category[
+        products[
             "lifestyle"
         ],
         lifestyle_file,
     )
 
     save_csv(
-        products_by_category[
+        products[
             "basketball"
         ],
         basketball_file,
@@ -652,7 +1006,7 @@ def main():
 
     print()
     print("=" * 70)
-    print("VERIFYING FEEDS")
+    print("VERIFYING OUTPUT FILES")
     print("=" * 70)
 
     verify_csv(
@@ -670,7 +1024,7 @@ def main():
 
     print()
     print(
-        "Lifestyle feed:"
+        "Lifestyle:"
     )
 
     print(
@@ -681,7 +1035,7 @@ def main():
 
     print()
     print(
-        "Basketball feed:"
+        "Basketball:"
     )
 
     print(
@@ -690,8 +1044,10 @@ def main():
         "chatgpt_ads_feed_basketball.csv"
     )
 
-    return True
 
+# ============================================================
+# ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
 
@@ -702,7 +1058,7 @@ if __name__ == "__main__":
 
         print()
         print(
-            f"ERROR: {error}"
+            f"FATAL ERROR: {error}"
         )
 
         sys.exit(1)
