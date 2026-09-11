@@ -13,8 +13,7 @@ import requests
 # ============================================================
 
 DEFAULT_CROPINK_FEED_URL = (
-    "https://backend.ballzy.eu/et/amfeed/feed/download"
-    "?id=102&file=cropink_et.xml"
+    "https://f.cropink.com/feed/11e9623b-ed98-4a61-a9f6-445782c38aa4"
 )
 
 DEFAULT_SELLER_NAME = "Ballzy"
