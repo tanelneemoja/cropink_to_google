@@ -63,6 +63,10 @@ jobs:
       # 5. Run TikTok Catalog Feed Generator
       - name: Generate TikTok Catalog CSV Feed
         run: python tiktok_feed.py
+        
+        # 6. Ensure GitHub Pages bypasses Jekyll filters
+      - name: Create .nojekyll file for GitHub Pages
+        run: touch .nojekyll
 
       # 6. Commit all generated files
       - name: Commit and push generated files
