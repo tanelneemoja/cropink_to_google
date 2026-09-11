@@ -70,16 +70,9 @@ jobs:
       - name: Run ChatGPT Ads Transformation Script
         run: python chatgpt_transform.py
         env:
-          CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
-
-          # IMPORTANT:
-          # This should match the merchant/store name.
-          SELLER_NAME: Ballzy
-
-          # Output will become:
-          # chatgpt_ads_feed_lifestyle.csv
-          # chatgpt_ads_feed_basketball.csv
-          OUTPUT_CSV_BASE: chatgpt_ads_feed
+         CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
+         SELLER_NAME: Ballzy
+         OUTPUT_CSV_BASE: chatgpt_ads_feed
 
 
       # ============================================================
