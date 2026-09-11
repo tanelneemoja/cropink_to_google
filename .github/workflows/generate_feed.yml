@@ -77,7 +77,7 @@ jobs:
           python chatgpt_transform.py
         env:
           CROPINK_FEED_URL: "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml"
-          SELLER_NAME: "Ballzy"
+          SELLER_NAME: "Streetbrand OÜ"
           OUTPUT_CSV_BASE: "chatgpt_ads_feed"
 
 
