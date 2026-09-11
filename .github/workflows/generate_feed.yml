@@ -248,7 +248,7 @@ jobs:
                   if row.get("seller_name") != "Streerbrand OÜ":
                       raise SystemExit(
                           f"ERROR: seller_name is "
-                          f"'{row.get('seller_name')}', expected 'Streerbrand OÜ'."
+                          f"'{row.get('seller_name')}', expected 'Streetbrand OÜ'."
                       )
 
                   if not row.get("url", "").startswith("https://"):
