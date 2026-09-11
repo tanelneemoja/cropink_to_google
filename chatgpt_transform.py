@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import re
 import sys
@@ -7,7 +8,7 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import requests
 
- 
+
 # ============================================================
 # CONFIGURATION
 # ============================================================
@@ -21,14 +22,31 @@ DEFAULT_OUTPUT_CSV_BASE = "chatgpt_ads_feed"
 
 REQUEST_TIMEOUT = 120
 
-# Number of products in the diagnostic test feed
+# Number of products in diagnostic feed
 TEST_PRODUCT_COUNT = 5
+
 
 # ============================================================
 # OPENAI ADS FEED COLUMNS
 # ============================================================
 
-CHATGPT_COLUMNS = [
+# Minimal diagnostic schema.
+# Use this first to isolate any OpenAI validation problem.
+TEST_COLUMNS = [
+    "item_id",
+    "title",
+    "description",
+    "url",
+    "brand",
+    "seller_name",
+    "image_url",
+    "availability",
+    "price",
+    "is_ads_eligible",
+]
+
+# Full feed schema after the minimal test is accepted.
+FULL_COLUMNS = [
     "item_id",
     "title",
     "description",
@@ -50,18 +68,17 @@ CHATGPT_COLUMNS = [
 
 def clean_text(text):
     """
-    Remove HTML tags, control characters and normalize whitespace.
+    Remove HTML, invalid control characters and normalize whitespace.
     """
-
     if not text:
         return ""
 
     text = str(text)
 
-    # Remove HTML
+    # Remove HTML tags
     text = re.sub(r"<[^>]+>", " ", text)
 
-    # Remove problematic control characters
+    # Remove control characters not allowed in normal text
     text = re.sub(
         r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]",
         " ",
@@ -75,14 +92,13 @@ def clean_text(text):
 
 
 # ============================================================
-# URL
+# URL HELPERS
 # ============================================================
 
 def force_https(url):
     """
-    Convert HTTP URLs to HTTPS.
+    Convert HTTP URL to HTTPS.
     """
-
     if not url:
         return ""
 
@@ -96,9 +112,8 @@ def force_https(url):
 
 def is_valid_https_url(url):
     """
-    Check that URL is HTTPS.
+    Check whether the URL uses HTTPS.
     """
-
     if not url:
         return False
 
@@ -111,13 +126,9 @@ def is_valid_https_url(url):
 
 def get_text(item, xpath, namespaces=None):
     """
-    Safely retrieve XML element text.
+    Safely return text from an XML element.
     """
-
-    element = item.find(
-        xpath,
-        namespaces=namespaces,
-    )
+    element = item.find(xpath, namespaces=namespaces)
 
     if element is not None and element.text:
         return element.text.strip()
@@ -126,33 +137,23 @@ def get_text(item, xpath, namespaces=None):
 
 
 # ============================================================
-# PRICE
+# PRICE HELPERS
 # ============================================================
 
 def parse_price_value(price_element):
     """
-    Convert price into:
-
+    Convert source price to:
         17.00 EUR
 
-    No thousands separators.
-    ISO 4217 currency code.
+    Accepts:
+        17 EUR
+        17.00 EUR
+        17.5 EUR
     """
-
-    if price_element is None:
+    if price_element is None or not price_element.text:
         return ""
 
-    if not price_element.text:
-        return ""
-
-    price_text = " ".join(
-        price_element.text.strip().split()
-    )
-
-    # Accept:
-    # 17 EUR
-    # 17.00 EUR
-    # 17.5 EUR
+    price_text = " ".join(price_element.text.strip().split())
 
     match = re.match(
         r"^([0-9]+(?:\.[0-9]+)?)\s*([A-Za-z]{3})$",
@@ -160,10 +161,7 @@ def parse_price_value(price_element):
     )
 
     if not match:
-        print(
-            f"WARNING: Could not parse price: "
-            f"{price_text}"
-        )
+        print(f"WARNING: Could not parse price: {price_text}")
         return ""
 
     amount = match.group(1)
@@ -172,26 +170,78 @@ def parse_price_value(price_element):
     return f"{amount} {currency}"
 
 
+def parse_money(price_string):
+    """
+    Parse:
+        99.99 EUR
+
+    Returns:
+        (99.99, "EUR")
+
+    or None if invalid.
+    """
+    if not price_string:
+        return None
+
+    match = re.match(
+        r"^([0-9]+(?:\.[0-9]+)?) ([A-Z]{3})$",
+        price_string.strip(),
+    )
+
+    if not match:
+        return None
+
+    return float(match.group(1)), match.group(2)
+
+
+def validate_sale_price(price, sale_price):
+    """
+    Return a valid sale_price or blank.
+
+    Sale price must:
+    - be positive
+    - use same currency
+    - be strictly lower than regular price
+    """
+    if not sale_price:
+        return ""
+
+    regular = parse_money(price)
+    sale = parse_money(sale_price)
+
+    if not regular or not sale:
+        return ""
+
+    regular_amount, regular_currency = regular
+    sale_amount, sale_currency = sale
+
+    if regular_amount <= 0:
+        return ""
+
+    if sale_amount <= 0:
+        return ""
+
+    if regular_currency != sale_currency:
+        return ""
+
+    if sale_amount >= regular_amount:
+        return ""
+
+    return sale_price
+
+
 # ============================================================
 # AVAILABILITY
 # ============================================================
 
 def parse_availability(availability_element):
     """
-    Convert Google availability to standard values.
+    Map source availability values to OpenAI-native values.
     """
-
-    if availability_element is None:
+    if availability_element is None or not availability_element.text:
         return "in_stock"
 
-    if not availability_element.text:
-        return "in_stock"
-
-    value = (
-        availability_element.text
-        .strip()
-        .lower()
-    )
+    value = availability_element.text.strip().lower()
 
     mapping = {
         "in stock": "in_stock",
@@ -207,10 +257,7 @@ def parse_availability(availability_element):
         "back_order": "backorder",
     }
 
-    return mapping.get(
-        value,
-        "in_stock",
-    )
+    return mapping.get(value, "in_stock")
 
 
 # ============================================================
@@ -223,18 +270,15 @@ def download_cropink_feed(url):
     print("=" * 70)
     print("DOWNLOADING CROPINK FEED")
     print("=" * 70)
-
     print(f"URL: {url}")
 
     try:
-
         response = requests.get(
             url,
             timeout=REQUEST_TIMEOUT,
             headers={
-                "User-Agent": (
-                    "Ballzy-ChatGPT-Ads-Feed/1.0"
-                )
+                "User-Agent": "Ballzy-ChatGPT-Ads-Feed/1.0",
+                "Accept": "application/xml,text/xml,*/*",
             },
         )
 
@@ -242,22 +286,14 @@ def download_cropink_feed(url):
 
         data = response.content
 
-        print(
-            f"Download successful: "
-            f"{len(data):,} bytes"
-        )
+        print(f"Download successful: {len(data):,} bytes")
 
         return data
 
     except requests.exceptions.RequestException as error:
-
         print()
-        print(
-            "ERROR: Failed to download Cropink feed."
-        )
-
+        print("ERROR: Failed to download Cropink feed.")
         print(error)
-
         return None
 
 
@@ -273,24 +309,14 @@ def parse_cropink_xml(data):
     print("=" * 70)
 
     try:
-
         root = ET.fromstring(data)
-
-        print(
-            "XML parsed successfully."
-        )
-
+        print("XML parsed successfully.")
         return root
 
     except ET.ParseError as error:
-
         print()
-        print(
-            "ERROR: Invalid XML."
-        )
-
+        print("ERROR: Invalid XML.")
         print(error)
-
         return None
 
 
@@ -299,22 +325,29 @@ def parse_cropink_xml(data):
 # ============================================================
 
 def get_product_category(item):
+    """
+    Determine whether product belongs to Basketball or Lifestyle.
 
-    custom_label_0 = item.find(
-        "custom_label_0"
-    )
+    Supports both:
+        <custom_label_0>
+    and
+        <g:custom_label_0>
+    """
 
-    if (
-        custom_label_0 is None
-        or not custom_label_0.text
-    ):
-        return None
+    namespaces = {
+        "g": "http://base.google.com/ns/1.0"
+    }
 
-    label = (
-        custom_label_0.text
-        .strip()
-        .lower()
-    )
+    label = get_text(item, "custom_label_0")
+
+    if not label:
+        label = get_text(
+            item,
+            "g:custom_label_0",
+            namespaces,
+        )
+
+    label = label.strip().lower()
 
     if "basketball" in label:
         return "basketball"
@@ -323,6 +356,32 @@ def get_product_category(item):
         return "lifestyle"
 
     return None
+
+
+# ============================================================
+# CUSTOM LABEL HELPER
+# ============================================================
+
+def get_custom_label(item, index, namespaces):
+    """
+    Try both unnamespaced and Google-namespaced custom labels.
+    """
+
+    value = get_text(
+        item,
+        f"custom_label_{index}",
+    )
+
+    if value:
+        return clean_text(value)
+
+    value = get_text(
+        item,
+        f"g:custom_label_{index}",
+        namespaces,
+    )
+
+    return clean_text(value)
 
 
 # ============================================================
@@ -336,10 +395,12 @@ def create_product(
     category,
 ):
 
-    item_id = get_text(
-        item,
-        "g:id",
-        namespaces,
+    item_id = clean_text(
+        get_text(
+            item,
+            "g:id",
+            namespaces,
+        )
     )
 
     title = clean_text(
@@ -405,12 +466,17 @@ def create_product(
         namespaces,
     )
 
-    sale_price = parse_price_value(
+    raw_sale_price = parse_price_value(
         sale_price_element
     )
 
+    sale_price = validate_sale_price(
+        price,
+        raw_sale_price,
+    )
+
     # --------------------------------------------------------
-    # COLOR
+    # OPTIONAL ATTRIBUTES FOR ADS METADATA
     # --------------------------------------------------------
 
     color = clean_text(
@@ -421,37 +487,72 @@ def create_product(
         )
     )
 
-    # --------------------------------------------------------
-    # SIMPLE METADATA
-    #
-    # For this diagnostic test we deliberately keep
-    # metadata simple.
-    # --------------------------------------------------------
-
-    metadata_parts = []
-
-    if brand:
-        metadata_parts.append(
-            f"brand:{brand}"
+    product_type = clean_text(
+        get_text(
+            item,
+            "g:product_type",
+            namespaces,
         )
-
-    if category:
-        metadata_parts.append(
-            f"category:{category}"
-        )
-
-    if color:
-        metadata_parts.append(
-            f"color:{color}"
-        )
-
-    ads_metadata = ";".join(
-        metadata_parts
     )
 
+    google_product_category = clean_text(
+        get_text(
+            item,
+            "g:google_product_category",
+            namespaces,
+        )
+    )
+
+    custom_labels = {}
+
+    for i in range(5):
+        value = get_custom_label(
+            item,
+            i,
+            namespaces,
+        )
+
+        if value:
+            custom_labels[f"custom_label_{i}"] = value
+
     # --------------------------------------------------------
-    # PRODUCT
+    # ADS METADATA
     # --------------------------------------------------------
+    #
+    # IMPORTANT:
+    # This must be valid JSON inside the CSV cell.
+    #
+    # Example:
+    # {"business_line":"lifestyle","brand":"adidas"}
+    #
+    # pandas will quote it correctly in the final CSV.
+    # --------------------------------------------------------
+
+    metadata = {}
+
+    if category:
+        metadata["business_line"] = category
+
+    if brand:
+        metadata["brand"] = brand
+
+    if color:
+        metadata["color"] = color
+
+    if product_type:
+        metadata["product_type"] = product_type
+
+    if google_product_category:
+        metadata["google_product_category"] = google_product_category
+
+    for key, value in custom_labels.items():
+        metadata[key] = value
+
+    ads_metadata = json.dumps(
+        metadata,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
 
     return {
         "item_id": item_id,
@@ -470,7 +571,7 @@ def create_product(
 
 
 # ============================================================
-# VALIDATION
+# PRODUCT VALIDATION
 # ============================================================
 
 def validate_product(product):
@@ -491,43 +592,26 @@ def validate_product(product):
     ]
 
     for field in required_fields:
-
-        value = product.get(
-            field,
-            "",
-        )
+        value = product.get(field, "")
 
         if not str(value).strip():
+            errors.append(f"missing {field}")
 
-            errors.append(
-                f"missing {field}"
-            )
-
-    # HTTPS product URL
+    # --------------------------------------------------------
+    # HTTPS
+    # --------------------------------------------------------
 
     if product.get("url"):
-
-        if not is_valid_https_url(
-            product["url"]
-        ):
-
-            errors.append(
-                "url is not HTTPS"
-            )
-
-    # HTTPS image URL
+        if not is_valid_https_url(product["url"]):
+            errors.append("url is not HTTPS")
 
     if product.get("image_url"):
+        if not is_valid_https_url(product["image_url"]):
+            errors.append("image_url is not HTTPS")
 
-        if not is_valid_https_url(
-            product["image_url"]
-        ):
-
-            errors.append(
-                "image_url is not HTTPS"
-            )
-
-    # Availability
+    # --------------------------------------------------------
+    # AVAILABILITY
+    # --------------------------------------------------------
 
     valid_availability = {
         "in_stock",
@@ -536,54 +620,108 @@ def validate_product(product):
         "backorder",
     }
 
-    if (
-        product.get("availability")
-        not in valid_availability
-    ):
+    if product.get("availability") not in valid_availability:
+        errors.append("invalid availability")
 
-        errors.append(
-            "invalid availability"
-        )
+    # --------------------------------------------------------
+    # SELLER
+    # --------------------------------------------------------
 
-    # Seller
+    if product.get("seller_name") != "Ballzy":
+        errors.append("seller_name is not Ballzy")
 
-    if product.get(
-        "seller_name"
-    ) != "Ballzy":
+    # --------------------------------------------------------
+    # ADS ELIGIBILITY
+    # --------------------------------------------------------
 
-        errors.append(
-            "seller_name is not Ballzy"
-        )
+    if product.get("is_ads_eligible") != "true":
+        errors.append("is_ads_eligible is not true")
 
-    # Ads eligibility
+    # --------------------------------------------------------
+    # REGULAR PRICE
+    # --------------------------------------------------------
 
-    if (
-        product.get(
-            "is_ads_eligible"
-        )
-        != "true"
-    ):
+    price = product.get("price", "")
 
-        errors.append(
-            "is_ads_eligible is not true"
-        )
+    price_info = parse_money(price)
 
-    # Price format
+    if not price_info:
+        errors.append("invalid price format")
+    else:
+        amount, _ = price_info
 
-    price = product.get(
-        "price",
+        if amount <= 0:
+            errors.append("price must be greater than zero")
+
+    # --------------------------------------------------------
+    # SALE PRICE
+    # --------------------------------------------------------
+
+    sale_price = product.get("sale_price", "")
+
+    if sale_price:
+        regular = parse_money(price)
+        sale = parse_money(sale_price)
+
+        if not regular or not sale:
+            errors.append("invalid sale_price format")
+
+        else:
+            regular_amount, regular_currency = regular
+            sale_amount, sale_currency = sale
+
+            if sale_currency != regular_currency:
+                errors.append(
+                    "sale_price currency differs from price"
+                )
+
+            if sale_amount <= 0:
+                errors.append(
+                    "sale_price must be greater than zero"
+                )
+
+            if sale_amount >= regular_amount:
+                errors.append(
+                    "sale_price must be below price"
+                )
+
+    # --------------------------------------------------------
+    # JSON METADATA
+    # --------------------------------------------------------
+
+    ads_metadata = product.get(
+        "ads_metadata",
         "",
     )
 
-    if price:
+    if ads_metadata:
+        try:
+            parsed = json.loads(
+                ads_metadata
+            )
 
-        if not re.match(
-            r"^[0-9]+(?:\.[0-9]+)? [A-Z]{3}$",
-            price,
-        ):
+            if not isinstance(parsed, dict):
+                errors.append(
+                    "ads_metadata is not a JSON object"
+                )
 
+            else:
+                for key, value in parsed.items():
+
+                    if not isinstance(key, str):
+                        errors.append(
+                            "ads_metadata key is not string"
+                        )
+
+                    if not isinstance(value, str):
+                        errors.append(
+                            f"ads_metadata value for {key} "
+                            "is not string"
+                        )
+
+        except json.JSONDecodeError:
             errors.append(
-                "invalid price format"
+                "ads_metadata contains invalid JSON"
             )
 
     return errors
@@ -618,9 +756,7 @@ def process_products(
 
     validation_examples = []
 
-    for item in root.findall(
-        ".//item"
-    ):
+    for item in root.findall(".//item"):
 
         total_items += 1
 
@@ -629,9 +765,7 @@ def process_products(
         )
 
         if category is None:
-
             ignored_items += 1
-
             continue
 
         product = create_product(
@@ -646,13 +780,9 @@ def process_products(
         )
 
         if errors:
-
             invalid_products += 1
 
-            if len(
-                validation_examples
-            ) < 10:
-
+            if len(validation_examples) < 20:
                 validation_examples.append(
                     (
                         product.get(
@@ -698,9 +828,7 @@ def process_products(
     if validation_examples:
 
         print()
-        print(
-            "First validation errors:"
-        )
+        print("First validation errors:")
 
         for item_id, errors in validation_examples:
 
@@ -719,30 +847,28 @@ def process_products(
 def save_csv(
     products,
     filename,
+    columns,
 ):
 
     print()
-    print(
-        f"Saving {filename}..."
-    )
+    print(f"Saving {filename}...")
 
     df = pd.DataFrame(
-        products,
-        columns=CHATGPT_COLUMNS,
+        products
     )
 
     df = df.reindex(
-        columns=CHATGPT_COLUMNS
+        columns=columns
     )
 
     try:
-
         df.to_csv(
             filename,
             index=False,
             encoding="utf-8",
             sep=",",
             quoting=csv.QUOTE_MINIMAL,
+            doublequote=True,
             lineterminator="\n",
         )
 
@@ -752,7 +878,6 @@ def save_csv(
         print(
             f"ERROR writing {filename}"
         )
-
         print(error)
 
         return False
@@ -780,7 +905,7 @@ def save_csv(
 
 
 # ============================================================
-# CREATE 5-PRODUCT TEST FEED
+# CREATE MINIMAL TEST FEED
 # ============================================================
 
 def save_test_feed(
@@ -790,7 +915,7 @@ def save_test_feed(
 
     print()
     print("=" * 70)
-    print("CREATING OPENAI ADS TEST FEED")
+    print("CREATING MINIMAL OPENAI ADS TEST FEED")
     print("=" * 70)
 
     test_products = products[
@@ -798,17 +923,33 @@ def save_test_feed(
     ]
 
     if not test_products:
-
         print(
             "ERROR: No products available "
             "for test feed."
         )
-
         return False
 
+    # Deliberately only use minimal required fields.
+    minimal_products = []
+
+    for product in test_products:
+
+        minimal_product = {
+            column: product.get(
+                column,
+                "",
+            )
+            for column in TEST_COLUMNS
+        }
+
+        minimal_products.append(
+            minimal_product
+        )
+
     result = save_csv(
-        products=test_products,
+        products=minimal_products,
         filename=filename,
+        columns=TEST_COLUMNS,
     )
 
     if not result:
@@ -817,16 +958,11 @@ def save_test_feed(
     print()
     print(
         f"TEST FEED CONTAINS "
-        f"{len(test_products)} PRODUCTS"
-    )
-
-    print()
-    print(
-        "Test products:"
+        f"{len(minimal_products)} PRODUCTS"
     )
 
     for number, product in enumerate(
-        test_products,
+        minimal_products,
         start=1,
     ):
 
@@ -866,11 +1002,6 @@ def save_test_feed(
         )
 
         print(
-            f"  is_ads_eligible: "
-            f"{product['is_ads_eligible']}"
-        )
-
-        print(
             f"  url: "
             f"{product['url']}"
         )
@@ -889,6 +1020,7 @@ def save_test_feed(
 
 def verify_csv(
     filename,
+    expected_columns,
 ):
 
     print()
@@ -904,11 +1036,9 @@ def verify_csv(
             f"ERROR: File does not exist: "
             f"{filename}"
         )
-
         return False
 
     try:
-
         df = pd.read_csv(
             filename,
             dtype=str,
@@ -920,9 +1050,7 @@ def verify_csv(
         print(
             "ERROR: Could not read CSV."
         )
-
         print(error)
-
         return False
 
     print(
@@ -933,9 +1061,7 @@ def verify_csv(
         f"Columns: {list(df.columns)}"
     )
 
-    # Exact columns
-
-    if list(df.columns) != CHATGPT_COLUMNS:
+    if list(df.columns) != expected_columns:
 
         print()
         print(
@@ -945,7 +1071,45 @@ def verify_csv(
 
         return False
 
+    # --------------------------------------------------------
+    # Required values
+    # --------------------------------------------------------
+
+    required_columns = [
+        "item_id",
+        "title",
+        "description",
+        "url",
+        "brand",
+        "seller_name",
+        "image_url",
+        "availability",
+        "price",
+        "is_ads_eligible",
+    ]
+
+    for column in required_columns:
+
+        empty_count = (
+            df[column]
+            .astype(str)
+            .str.strip()
+            .eq("")
+            .sum()
+        )
+
+        if empty_count:
+
+            print(
+                f"ERROR: {column} has "
+                f"{empty_count} empty values."
+            )
+
+            return False
+
+    # --------------------------------------------------------
     # Seller
+    # --------------------------------------------------------
 
     sellers = (
         df["seller_name"]
@@ -954,7 +1118,8 @@ def verify_csv(
     )
 
     print(
-        f"Seller names: {sellers}"
+        f"Seller names: "
+        f"{sellers}"
     )
 
     if sellers != ["Ballzy"]:
@@ -965,7 +1130,9 @@ def verify_csv(
 
         return False
 
-    # Ads eligibility
+    # --------------------------------------------------------
+    # Eligibility
+    # --------------------------------------------------------
 
     ads_values = (
         df["is_ads_eligible"]
@@ -981,25 +1148,15 @@ def verify_csv(
     if ads_values != ["true"]:
 
         print(
-            "ERROR: is_ads_eligible check failed."
+            "ERROR: is_ads_eligible "
+            "check failed."
         )
 
         return False
 
-    # Availability
-
-    availability_values = (
-        df["availability"]
-        .drop_duplicates()
-        .tolist()
-    )
-
-    print(
-        f"Availability values: "
-        f"{availability_values}"
-    )
-
-    # HTTPS URLs
+    # --------------------------------------------------------
+    # HTTPS
+    # --------------------------------------------------------
 
     bad_urls = df[
         ~df["url"].str.startswith(
@@ -1033,34 +1190,122 @@ def verify_csv(
 
         return False
 
-    # Required values
+    # --------------------------------------------------------
+    # PRICE
+    # --------------------------------------------------------
 
-    for column in [
-        "item_id",
-        "title",
-        "description",
-        "url",
-        "brand",
-        "seller_name",
-        "image_url",
-        "availability",
-        "price",
-        "is_ads_eligible",
-    ]:
+    invalid_price_count = 0
 
-        empty_count = (
-            df[column]
-            .astype(str)
-            .str.strip()
-            .eq("")
-            .sum()
+    for value in df["price"]:
+
+        info = parse_money(
+            value
         )
 
-        if empty_count:
+        if not info:
+            invalid_price_count += 1
+            continue
+
+        amount, _ = info
+
+        if amount <= 0:
+            invalid_price_count += 1
+
+    if invalid_price_count:
+
+        print(
+            f"ERROR: {invalid_price_count} "
+            "invalid prices."
+        )
+
+        return False
+
+    # --------------------------------------------------------
+    # OPTIONAL FULL-FEED CHECKS
+    # --------------------------------------------------------
+
+    if "sale_price" in df.columns:
+
+        invalid_sale_count = 0
+
+        for _, row in df.iterrows():
+
+            sale_price = row[
+                "sale_price"
+            ].strip()
+
+            if not sale_price:
+                continue
+
+            regular = parse_money(
+                row["price"]
+            )
+
+            sale = parse_money(
+                sale_price
+            )
+
+            if not regular or not sale:
+                invalid_sale_count += 1
+                continue
+
+            regular_amount, regular_currency = regular
+            sale_amount, sale_currency = sale
+
+            if (
+                sale_currency != regular_currency
+                or sale_amount <= 0
+                or sale_amount >= regular_amount
+            ):
+                invalid_sale_count += 1
+
+        if invalid_sale_count:
 
             print(
-                f"ERROR: {column} has "
-                f"{empty_count} empty values."
+                f"ERROR: {invalid_sale_count} "
+                "invalid sale prices."
+            )
+
+            return False
+
+    if "ads_metadata" in df.columns:
+
+        metadata_errors = 0
+
+        for value in df[
+            "ads_metadata"
+        ]:
+
+            if not value:
+                continue
+
+            try:
+                parsed = json.loads(
+                    value
+                )
+
+                if not isinstance(
+                    parsed,
+                    dict,
+                ):
+                    metadata_errors += 1
+                    continue
+
+                if not all(
+                    isinstance(k, str)
+                    and isinstance(v, str)
+                    for k, v in parsed.items()
+                ):
+                    metadata_errors += 1
+
+            except json.JSONDecodeError:
+                metadata_errors += 1
+
+        if metadata_errors:
+
+            print(
+                f"ERROR: {metadata_errors} "
+                "invalid ads_metadata values."
             )
 
             return False
@@ -1087,7 +1332,6 @@ def print_sample(filename):
     print("=" * 70)
 
     try:
-
         df = pd.read_csv(
             filename,
             dtype=str,
@@ -1095,18 +1339,13 @@ def print_sample(filename):
         )
 
         print()
-        print(
-            "HEADER:"
-        )
-
+        print("HEADER:")
         print(
             ",".join(df.columns)
         )
 
         print()
-        print(
-            "FIRST PRODUCT:"
-        )
+        print("FIRST PRODUCT:")
 
         if len(df) > 0:
 
@@ -1135,10 +1374,6 @@ def main():
     )
     print("=" * 70)
 
-    # --------------------------------------------------------
-    # ENVIRONMENT
-    # --------------------------------------------------------
-
     cropink_url = os.environ.get(
         "CROPINK_FEED_URL",
         DEFAULT_CROPINK_FEED_URL,
@@ -1155,11 +1390,13 @@ def main():
     )
 
     print(
-        f"Seller name: {seller_name}"
+        f"Seller name: "
+        f"{seller_name}"
     )
 
     print(
-        f"Output base: {output_csv_base}"
+        f"Output base: "
+        f"{output_csv_base}"
     )
 
     # --------------------------------------------------------
@@ -1206,11 +1443,13 @@ def main():
         seller_name=seller_name,
     )
 
-    # --------------------------------------------------------
-    # SAVE FULL FEEDS
-    # --------------------------------------------------------
-
     success = True
+
+    generated_files = []
+
+    # --------------------------------------------------------
+    # FULL FEEDS
+    # --------------------------------------------------------
 
     for category in [
         "lifestyle",
@@ -1225,62 +1464,81 @@ def main():
 
             print()
             print(
-                f"WARNING: No valid {category} "
-                f"products found."
+                f"WARNING: No valid "
+                f"{category} products found."
             )
 
             continue
 
         filename = (
-            f"{output_csv_base}_{category}.csv"
+            f"{output_csv_base}_"
+            f"{category}.csv"
         )
 
-        if not save_csv(
+        if save_csv(
             products=products,
             filename=filename,
+            columns=FULL_COLUMNS,
         ):
 
+            generated_files.append(
+                (
+                    filename,
+                    FULL_COLUMNS,
+                )
+            )
+
+        else:
             success = False
 
     # --------------------------------------------------------
-    # CREATE TEST FEED
+    # MINIMAL 5-PRODUCT TEST FEED
     # --------------------------------------------------------
 
-    if not save_test_feed(
-        products_by_category["lifestyle"],
-        "chatgpt_ads_test.csv",
+    test_filename = (
+        "chatgpt_ads_test.csv"
+    )
+
+    if save_test_feed(
+        products_by_category[
+            "lifestyle"
+        ],
+        test_filename,
     ):
 
+        generated_files.append(
+            (
+                test_filename,
+                TEST_COLUMNS,
+            )
+        )
+
+    else:
         success = False
 
     # --------------------------------------------------------
-    # VERIFY ALL FILES
+    # VERIFY EVERYTHING
     # --------------------------------------------------------
 
     print()
     print("=" * 70)
-    print("FINAL CSV VERIFICATION")
+    print(
+        "FINAL CSV VERIFICATION"
+    )
     print("=" * 70)
 
-    files_to_verify = [
-        "chatgpt_ads_feed_lifestyle.csv",
-        "chatgpt_ads_feed_basketball.csv",
-        "chatgpt_ads_test.csv",
-    ]
+    for filename, columns in generated_files:
 
-    for filename in files_to_verify:
+        if not verify_csv(
+            filename,
+            columns,
+        ):
 
-        if os.path.exists(filename):
+            success = False
 
-            if not verify_csv(
-                filename
-            ):
-
-                success = False
-
-            print_sample(
-                filename
-            )
+        print_sample(
+            filename
+        )
 
     # --------------------------------------------------------
     # FINAL
@@ -1292,19 +1550,20 @@ def main():
     if success:
 
         print(
-            "CHATGPT ADS FEED GENERATION COMPLETE"
+            "CHATGPT ADS FEED "
+            "GENERATION COMPLETE"
         )
 
         print("=" * 70)
 
         print()
-        print(
-            "Generated files:"
-        )
+        print("Generated files:")
 
-        for filename in files_to_verify:
+        for filename, _ in generated_files:
 
-            if os.path.exists(filename):
+            if os.path.exists(
+                filename
+            ):
 
                 size = os.path.getsize(
                     filename
@@ -1317,7 +1576,7 @@ def main():
 
         print()
         print(
-            "IMPORTANT TEST URL:"
+            "TEST THIS URL FIRST:"
         )
 
         print(
@@ -1326,10 +1585,23 @@ def main():
             "chatgpt_ads_test.csv"
         )
 
+        print()
+        print(
+            "If the 5-product test imports "
+            "successfully, then test:"
+        )
+
+        print(
+            "https://tanelneemoja.github.io/"
+            "cropink_to_google/"
+            "chatgpt_ads_feed_lifestyle.csv"
+        )
+
     else:
 
         print(
-            "CHATGPT ADS FEED GENERATION FAILED"
+            "CHATGPT ADS FEED "
+            "GENERATION FAILED"
         )
 
         print("=" * 70)
@@ -1348,5 +1620,4 @@ if __name__ == "__main__":
     success = main()
 
     if not success:
-
         sys.exit(1)
