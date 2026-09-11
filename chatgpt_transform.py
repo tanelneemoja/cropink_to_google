@@ -2,216 +2,525 @@ import csv
 import os
 import re
 import xml.etree.ElementTree as ET
+
 import pandas as pd
 import requests
 
 
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
+# Your Cropink source feed
+DEFAULT_CROPINK_FEED_URL = (
+    "https://backend.ballzy.eu/et/amfeed/feed/download"
+    "?id=102&file=cropink_et.xml"
+)
+
+# IMPORTANT:
+# This should be the merchant/store name customers see.
+# Change this if necessary.
+DEFAULT_SELLER_NAME = "Ballzy"
+
+# Output files
+DEFAULT_OUTPUT_BASE = "chatgpt_ads_feed"
+
+
+# ============================================================
+# HELPERS
+# ============================================================
+
 def clean_text(text):
-    """Strips HTML tags and normalizes whitespace for conversational LLM matching."""
+    """
+    Remove HTML and normalize whitespace.
+    """
     if not text:
         return ""
+
     clean = re.sub(r"<[^>]+>", " ", text)
     return " ".join(clean.split())
 
 
 def parse_price_value(price_element):
-    """Extracts price formatted as 'VALUE CURRENCY', e.g., '120.00 EUR'."""
-    if price_element is not None and price_element.text:
-        price_text = price_element.text.strip()
-        match = re.match(r"([\d.]+)\s*([A-Z]{3})$", price_text, re.IGNORECASE)
-        if match:
-            return f"{match.group(1)} {match.group(2).upper()}"
-        return price_text
-    return ""
+    """
+    Convert Google-style price such as:
+        120.00 EUR
+
+    into:
+        120.00 EUR
+    """
+    if price_element is None or not price_element.text:
+        return ""
+
+    price_text = price_element.text.strip()
+
+    match = re.match(
+        r"([\d.,]+)\s*([A-Z]{3})$",
+        price_text,
+        re.IGNORECASE
+    )
+
+    if match:
+        value = match.group(1)
+        currency = match.group(2).upper()
+
+        return f"{value} {currency}"
+
+    return price_text
 
 
 def parse_availability(availability_element):
-    """Maps standard Google availability to OpenAI schema values."""
-    if availability_element is not None and availability_element.text:
-        val = availability_element.text.strip().lower()
-        if val in ["in stock", "in_stock"]:
-            return "in_stock"
-        elif val in ["out of stock", "out_of_stock"]:
-            return "out_of_stock"
-        elif val in ["preorder", "pre_order"]:
-            return "pre_order"
-        elif val in ["backorder", "back_order"]:
-            return "backorder"
-    return "in_stock"
+    """
+    Convert Google-style availability values to the
+    OpenAI product feed values.
+    """
 
+    if availability_element is None:
+        return "in_stock"
+
+    if not availability_element.text:
+        return "in_stock"
+
+    value = availability_element.text.strip().lower()
+
+    mapping = {
+        "in stock": "in_stock",
+        "in_stock": "in_stock",
+
+        "out of stock": "out_of_stock",
+        "out_of_stock": "out_of_stock",
+
+        "preorder": "pre_order",
+        "pre_order": "pre_order",
+
+        "backorder": "backorder",
+        "back_order": "backorder",
+    }
+
+    return mapping.get(value, "in_stock")
+
+
+def get_text(item, xpath, namespaces=None):
+    """
+    Safely get XML element text.
+    """
+    element = item.find(xpath, namespaces=namespaces)
+
+    if element is not None and element.text:
+        return element.text.strip()
+
+    return ""
+
+
+# ============================================================
+# MAIN TRANSFORMATION
+# ============================================================
 
 def transform_cropink_to_chatgpt_ads_csv(
-    cropink_url, output_csv_base="chatgpt_ads_feed"
+    cropink_url,
+    output_csv_base="chatgpt_ads_feed",
+    seller_name="Ballzy",
 ):
-    """Fetches Cropink XML feed and maps it into compressed OpenAI/ChatGPT Ads CSV.GZ files."""
-    print(f"Fetching Cropink feed from: {cropink_url}")
+    print("=" * 70)
+    print("CHATGPT ADS PRODUCT FEED GENERATOR")
+    print("=" * 70)
+
+    print()
+    print(f"Source feed:")
+    print(cropink_url)
+
+    print()
+    print(f"Seller name:")
+    print(seller_name)
+
+    # --------------------------------------------------------
+    # DOWNLOAD CROPINK XML
+    # --------------------------------------------------------
+
+    print()
+    print("Downloading Cropink feed...")
+
     try:
-        response = requests.get(cropink_url)
+        response = requests.get(
+            cropink_url,
+            timeout=120,
+            headers={
+                "User-Agent": "ChatGPT-Ads-Feed-Generator/1.0"
+            },
+        )
+
         response.raise_for_status()
-        cropink_data = response.text
-        print("Successfully fetched Cropink feed.")
+
+        cropink_data = response.content
+
+        print(
+            f"Download successful: {len(cropink_data):,} bytes"
+        )
+
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching Cropink feed: {e}")
+        print()
+        print("ERROR: Could not download Cropink feed.")
+        print(e)
         return False
 
-    print("Parsing Cropink XML...")
+    # --------------------------------------------------------
+    # PARSE XML
+    # --------------------------------------------------------
+
+    print()
+    print("Parsing XML...")
+
     try:
         root = ET.fromstring(cropink_data)
-        print("Successfully parsed XML.")
+
+        print("XML parsed successfully.")
+
     except ET.ParseError as e:
-        print(f"Error parsing XML: {e}")
+        print()
+        print("ERROR: Cropink XML is invalid.")
+        print(e)
         return False
 
-    products_by_category = {"basketball": [], "lifestyle": []}
-    namespaces = {"g": "http://base.google.com/ns/1.0"}
+    # Google namespace
+    namespaces = {
+        "g": "http://base.google.com/ns/1.0"
+    }
 
-    # Process XML items
+    # --------------------------------------------------------
+    # PRODUCT GROUPS
+    # --------------------------------------------------------
+
+    products_by_category = {
+        "basketball": [],
+        "lifestyle": [],
+    }
+
+    total_items = 0
+    ignored_items = 0
+
+    # --------------------------------------------------------
+    # PROCESS PRODUCTS
+    # --------------------------------------------------------
+
+    print()
+    print("Processing products...")
+
     for item in root.findall(".//item"):
+
+        total_items += 1
+
+        # ----------------------------------------------------
+        # Determine category from custom_label_0
+        # ----------------------------------------------------
+
         custom_label_0 = item.find("custom_label_0")
+
         category_key = None
+
         if custom_label_0 is not None and custom_label_0.text:
+
             label_text = custom_label_0.text.strip().lower()
+
             if "basketball" in label_text:
                 category_key = "basketball"
+
             elif "lifestyle" in label_text:
                 category_key = "lifestyle"
 
-        if category_key:
-            product_data = {
-                "item_id": "",
-                "title": "",
-                "description": "",
-                "url": "",
-                "image_url": "",
-                "brand": "",
-                "price": "",
-                "sale_price": "",
-                "availability": "in_stock",
-                "google_product_category": "",
-                "product_type": "",
-                "is_ads_eligible": "true",
-                "enable_search": "true",
-                "ads_metadata": "",
-            }
+        # Ignore products that aren't in our two categories
+        if category_key is None:
+            ignored_items += 1
+            continue
 
-            g_id = item.find("g:id", namespaces=namespaces)
-            if g_id is not None and g_id.text:
-                product_data["item_id"] = g_id.text.strip()
+        # ----------------------------------------------------
+        # Read Google product fields
+        # ----------------------------------------------------
 
-            g_title = item.find("g:title", namespaces=namespaces)
-            if g_title is not None and g_title.text:
-                product_data["title"] = clean_text(g_title.text)
+        item_id = get_text(
+            item,
+            "g:id",
+            namespaces
+        )
 
-            g_link = item.find("g:link", namespaces=namespaces)
-            if g_link is not None and g_link.text:
-                product_data["url"] = g_link.text.strip()
-
-            g_image_link = item.find("g:image_link", namespaces=namespaces)
-            if g_image_link is not None and g_image_link.text:
-                product_data["image_url"] = g_image_link.text.strip()
-
-            g_description = item.find("g:description", namespaces=namespaces)
-            if g_description is not None and g_description.text:
-                product_data["description"] = clean_text(g_description.text)
-
-            g_brand = item.find("g:brand", namespaces=namespaces)
-            if g_brand is not None and g_brand.text:
-                product_data["brand"] = g_brand.text.strip()
-
-            g_availability = item.find("g:availability", namespaces=namespaces)
-            product_data["availability"] = parse_availability(g_availability)
-
-            g_product_category = item.find(
-                "g:google_product_category", namespaces=namespaces
+        title = clean_text(
+            get_text(
+                item,
+                "g:title",
+                namespaces
             )
-            if g_product_category is not None and g_product_category.text:
-                product_data["google_product_category"] = (
-                    g_product_category.text.strip()
-                )
+        )
 
-            g_product_type = item.find("g:product_type", namespaces=namespaces)
-            if g_product_type is not None and g_product_type.text:
-                product_data["product_type"] = g_product_type.text.strip()
+        description = clean_text(
+            get_text(
+                item,
+                "g:description",
+                namespaces
+            )
+        )
 
-            g_price = item.find("g:price", namespaces=namespaces)
-            product_data["price"] = parse_price_value(g_price)
+        url = get_text(
+            item,
+            "g:link",
+            namespaces
+        )
 
-            g_sale_price = item.find("g:sale_price", namespaces=namespaces)
-            product_data["sale_price"] = parse_price_value(g_sale_price)
+        image_url = get_text(
+            item,
+            "g:image_link",
+            namespaces
+        )
 
-            meta_attributes = []
-            if product_data["brand"]:
-                meta_attributes.append(f"brand:{product_data['brand']}")
+        brand = get_text(
+            item,
+            "g:brand",
+            namespaces
+        )
 
-            g_color = item.find("g:color", namespaces=namespaces)
-            if g_color is not None and g_color.text:
-                meta_attributes.append(f"color:{g_color.text.strip()}")
+        availability_element = item.find(
+            "g:availability",
+            namespaces
+        )
 
-            for i in range(5):
-                custom_label = item.find(f"custom_label_{i}")
-                if custom_label is not None and custom_label.text:
-                    meta_attributes.append(custom_label.text.strip())
+        availability = parse_availability(
+            availability_element
+        )
 
-            product_data["ads_metadata"] = ";".join(meta_attributes)
-            products_by_category[category_key].append(product_data)
+        price_element = item.find(
+            "g:price",
+            namespaces
+        )
 
-    chatgpt_columns_order = [
+        price = parse_price_value(
+            price_element
+        )
+
+        sale_price_element = item.find(
+            "g:sale_price",
+            namespaces
+        )
+
+        sale_price = parse_price_value(
+            sale_price_element
+        )
+
+        google_product_category = get_text(
+            item,
+            "g:google_product_category",
+            namespaces
+        )
+
+        product_type = get_text(
+            item,
+            "g:product_type",
+            namespaces
+        )
+
+        # ----------------------------------------------------
+        # Additional labels for ads metadata
+        # ----------------------------------------------------
+
+        metadata = {}
+
+        if brand:
+            metadata["brand"] = brand
+
+        metadata["category"] = category_key
+
+        if google_product_category:
+            metadata["google_product_category"] = (
+                google_product_category
+            )
+
+        if product_type:
+            metadata["product_type"] = product_type
+
+        # Color
+        color = get_text(
+            item,
+            "g:color",
+            namespaces
+        )
+
+        if color:
+            metadata["color"] = color
+
+        # Custom labels
+        for i in range(5):
+
+            label = item.find(
+                f"custom_label_{i}"
+            )
+
+            if label is not None and label.text:
+
+                value = label.text.strip()
+
+                if value:
+                    metadata[
+                        f"custom_label_{i}"
+                    ] = value
+
+        # ----------------------------------------------------
+        # Create OpenAI Ads product
+        # ----------------------------------------------------
+
+        product_data = {
+            "item_id": item_id,
+            "title": title,
+            "description": description,
+            "url": url,
+            "brand": brand,
+            "seller_name": seller_name,
+            "image_url": image_url,
+            "availability": availability,
+            "price": price,
+            "sale_price": sale_price,
+            "is_ads_eligible": "true",
+            "ads_metadata": ";".join(
+                f"{key}:{value}"
+                for key, value in metadata.items()
+            ),
+        }
+
+        products_by_category[
+            category_key
+        ].append(product_data)
+
+    # --------------------------------------------------------
+    # OUTPUT COLUMNS
+    # --------------------------------------------------------
+
+    columns = [
         "item_id",
         "title",
         "description",
         "url",
-        "image_url",
         "brand",
+        "seller_name",
+        "image_url",
+        "availability",
         "price",
         "sale_price",
-        "availability",
-        "google_product_category",
-        "product_type",
         "is_ads_eligible",
-        "enable_search",
         "ads_metadata",
     ]
 
+    # --------------------------------------------------------
+    # SAVE FILES
+    # --------------------------------------------------------
+
     success = True
+
+    print()
+    print("=" * 70)
+    print("RESULT")
+    print("=" * 70)
+
+    print()
+    print(f"Total XML items: {total_items:,}")
+    print(f"Ignored items:   {ignored_items:,}")
+
     for category, product_list in products_by_category.items():
-        if product_list:
-            # Output filename ending in .csv.gz
-            output_gz_file = f"{output_csv_base}_{category}.csv.gz"
-            df = pd.DataFrame(product_list)
-            df = df.reindex(columns=chatgpt_columns_order)
+
+        if not product_list:
+
+            print()
+            print(
+                f"No products found for: {category}"
+            )
+
+            continue
+
+        output_file = (
+            f"{output_csv_base}_{category}.csv"
+        )
+
+        print()
+        print(
+            f"{category.upper()}: "
+            f"{len(product_list):,} products"
+        )
+
+        df = pd.DataFrame(product_list)
+
+        df = df.reindex(
+            columns=columns
+        )
+
+        try:
+
+            df.to_csv(
+                output_file,
+                index=False,
+                encoding="utf-8",
+                sep=",",
+                quoting=csv.QUOTE_MINIMAL,
+                lineterminator="\n",
+            )
+
+            file_size = os.path.getsize(
+                output_file
+            )
 
             print(
-                f"Saving {len(product_list)} items for {category.capitalize()} to {output_gz_file}..."
+                f"Saved: {output_file}"
             )
-            try:
-                # Compression parameter creates a native gzip stream directly
-                df.to_csv(
-                    output_gz_file,
-                    index=False,
-                    encoding="utf-8",
-                    sep=",",
-                    doublequote=True,
-                    quoting=csv.QUOTE_MINIMAL,
-                    compression="gzip",
-                )
-                print(f"Successfully generated: {output_gz_file}")
-            except IOError as e:
-                print(f"Error saving compressed CSV: {e}")
-                success = False
-        else:
-            print(f"No products found for '{category.capitalize()}'.")
+
+            print(
+                f"Size:  {file_size:,} bytes"
+            )
+
+        except IOError as e:
+
+            print(
+                f"ERROR saving {output_file}: {e}"
+            )
+
+            success = False
+
+    print()
+
+    if success:
+
+        print("=" * 70)
+        print("SUCCESS")
+        print("=" * 70)
+
+    else:
+
+        print("=" * 70)
+        print("FAILED")
+        print("=" * 70)
 
     return success
 
 
+# ============================================================
+# ENTRY POINT
+# ============================================================
+
 if __name__ == "__main__":
+
     cropink_feed_url = os.environ.get(
         "CROPINK_FEED_URL",
-        "https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml",
+        DEFAULT_CROPINK_FEED_URL,
     )
-    output_csv_base = os.environ.get("OUTPUT_CSV_BASE", "chatgpt_ads_feed")
 
-    if transform_cropink_to_chatgpt_ads_csv(cropink_feed_url, output_csv_base):
-        print("ChatGPT Ads feed transformation completed successfully.")
-    else:
-        print("ChatGPT Ads feed transformation failed.")
+    seller_name = os.environ.get(
+        "SELLER_NAME",
+        DEFAULT_SELLER_NAME,
+    )
+
+    output_csv_base = os.environ.get(
+        "OUTPUT_CSV_BASE",
+        DEFAULT_OUTPUT_BASE,
+    )
+
+    success = transform_cropink_to_chatgpt_ads_csv(
+        cropink_url=cropink_feed_url,
+        output_csv_base=output_csv_base,
+        seller_name=seller_name,
+    )
+
+    if not success:
+        raise SystemExit(1)
