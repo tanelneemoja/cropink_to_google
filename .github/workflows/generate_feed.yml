@@ -2,12 +2,14 @@ name: Generate Google Ads & ChatGPT Ads CSV Feed
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Run every 6 hours
-  workflow_dispatch: 
+    - cron: '0 */6 * * *'
+
+  workflow_dispatch:
+
   push:
     paths:
       - 'transform_cropink_feed.py'
-      - 'chatgpt_transform.py'        # NEW: Added trigger for ChatGPT Ads script
+      - 'chatgpt_transform.py'
       - 'transform_feed.py'
       - 'street_shoes_extractor.py'
       - 'top_revenue_feeds.py'
@@ -17,61 +19,158 @@ on:
 jobs:
   generate_csv:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: write 
+      contents: write
+
     steps:
+
+      # ============================================================
+      # CHECKOUT
+      # ============================================================
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
+
+      # ============================================================
+      # PYTHON
+      # ============================================================
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
+
+      # ============================================================
+      # DEPENDENCIES
+      # ============================================================
+
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install requests pandas
 
-      # 1. Run the original transformation script
-      - name: Run Primary Transformation Script (CSV)
+
+      # ============================================================
+      # 1. GOOGLE ADS / PRIMARY FEED
+      # ============================================================
+
+      - name: Run Primary Transformation Script
         run: python transform_cropink_feed.py
         env:
           CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
-      # 2. NEW: Run ChatGPT Ads transformation script
-      - name: Run ChatGPT Ads Transformation Script (CSV)
+
+      # ============================================================
+      # 2. CHATGPT ADS FEED
+      # ============================================================
+
+      - name: Run ChatGPT Ads Transformation Script
         run: python chatgpt_transform.py
         env:
           CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
+
+          # IMPORTANT:
+          # This should match the merchant/store name.
+          SELLER_NAME: Ballzy
+
+          # Output will become:
+          # chatgpt_ads_feed_lifestyle.csv
+          # chatgpt_ads_feed_basketball.csv
           OUTPUT_CSV_BASE: chatgpt_ads_feed
 
-      # 3. Run the Street Shoes extractor script
-      - name: Run Street Shoes Product Extractor (TXT)
+
+      # ============================================================
+      # 3. STREET SHOES
+      # ============================================================
+
+      - name: Run Street Shoes Product Extractor
         run: python street_shoes_extractor.py
         env:
           FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
-      # 4. Run the 4-Country Top Revenue Feeds script
-      - name: Generate Top 50 Revenue Page Feeds (4 Countries)
+
+      # ============================================================
+      # 4. TOP REVENUE FEEDS
+      # ============================================================
+
+      - name: Generate Top 50 Revenue Page Feeds
         run: python top_revenue_feeds.py
         env:
           GOOGLE_SHEET_ID: '1ZLASFV0JVAeIT4J3B4RNu-8NhDLFqd0Wsye2M_9eAR8'
-          
+
+
+      # ============================================================
+      # 5. LV / LT / FI CATALOGUES
+      # ============================================================
+
       - name: Generate LV LT FI Catalogues
         run: python transform_feed.py
 
-      # 5. Run TikTok Catalog Feed Generator
-      - name: Generate TikTok Catalog CSV Feed
+
+      # ============================================================
+      # 6. TIKTOK
+      # ============================================================
+
+      - name: Generate TikTok Catalog Feed
         run: python tiktok_feed.py
-        
-        # 6. Ensure GitHub Pages bypasses Jekyll filters
-      - name: Create .nojekyll file for GitHub Pages
+
+
+      # ============================================================
+      # 7. GITHUB PAGES
+      # ============================================================
+
+      - name: Create .nojekyll
         run: touch .nojekyll
 
-      # 7. Commit all generated files
+
+      # ============================================================
+      # 8. VERIFY CHATGPT ADS FILES
+      # ============================================================
+
+      - name: Verify ChatGPT Ads feeds
+        run: |
+          echo "Checking generated ChatGPT Ads files..."
+
+          ls -lh chatgpt_ads_feed_*.csv
+
+          echo ""
+          echo "Lifestyle feed header:"
+          head -n 1 chatgpt_ads_feed_lifestyle.csv
+
+          echo ""
+          echo "First lifestyle product:"
+          sed -n '2p' chatgpt_ads_feed_lifestyle.csv
+
+          echo ""
+          echo "Basketball feed header:"
+          head -n 1 chatgpt_ads_feed_basketball.csv
+
+          echo ""
+          echo "First basketball product:"
+          sed -n '2p' chatgpt_ads_feed_basketball.csv
+
+
+      # ============================================================
+      # 9. COMMIT EVERYTHING
+      # ============================================================
+
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          file_pattern: '.nojekyll *.csv.gz google_ads_feed_*.csv chatgpt_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv tiktok_catalog_feed.csv'
-          commit_message: 'Automated: Update feeds including compressed ChatGPT Ads feed'
+          file_pattern: |
+            .nojekyll
+            *.csv
+            *.csv.gz
+            google_ads_feed_*.csv
+            chatgpt_ads_feed_*.csv
+            street_shoes_product_names.txt
+            *_page_feed.csv
+            ballzy_*.csv
+            tiktok_catalog_feed.csv
+
+          commit_message: 'Automated: Update product feeds'
+
           commit_author: 'GitHub Actions <action@github.com>'
