@@ -1,4 +1,4 @@
-name: Generate Google Ads CSV Feed
+name: Generate Google Ads & ChatGPT Ads CSV Feed
 
 on:
   schedule:
@@ -7,10 +7,11 @@ on:
   push:
     paths:
       - 'transform_cropink_feed.py'
+      - 'chatgpt_transform.py'        # NEW: Added trigger for ChatGPT Ads script
       - 'transform_feed.py'
       - 'street_shoes_extractor.py'
-      - 'top_revenue_feeds.py'  # Added trigger for the new script
-      - 'tiktok_feed.py'        # NEW: Added trigger for TikTok feed script
+      - 'top_revenue_feeds.py'
+      - 'tiktok_feed.py'
       - '.github/workflows/generate_feed.yml'
 
 jobs:
@@ -37,13 +38,20 @@ jobs:
         env:
           CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
-      # 2. Run the Street Shoes extractor script
+      # 2. NEW: Run ChatGPT Ads transformation script
+      - name: Run ChatGPT Ads Transformation Script (CSV)
+        run: python chatgpt_transform.py
+        env:
+          CROPINK_FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
+          OUTPUT_CSV_BASE: chatgpt_ads_feed
+
+      # 3. Run the Street Shoes extractor script
       - name: Run Street Shoes Product Extractor (TXT)
         run: python street_shoes_extractor.py
         env:
           FEED_URL: https://backend.ballzy.eu/et/amfeed/feed/download?id=102&file=cropink_et.xml
 
-      # 3. NEW: Run the 4-Country Top Revenue Feeds script
+      # 4. Run the 4-Country Top Revenue Feeds script
       - name: Generate Top 50 Revenue Page Feeds (4 Countries)
         run: python top_revenue_feeds.py
         env:
@@ -52,14 +60,14 @@ jobs:
       - name: Generate LV LT FI Catalogues
         run: python transform_feed.py
 
-      # 4. NEW: Run TikTok Catalog Feed Generator
+      # 5. Run TikTok Catalog Feed Generator
       - name: Generate TikTok Catalog CSV Feed
         run: python tiktok_feed.py
 
-      # 5. Commit all generated files
+      # 6. Commit all generated files
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          file_pattern: 'google_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv tiktok_catalog_feed.csv'
-          commit_message: 'Automated: Update feeds including TikTok Catalog feed'
+          file_pattern: 'google_ads_feed_*.csv chatgpt_ads_feed_*.csv street_shoes_product_names.txt *_page_feed.csv ballzy_*.csv tiktok_catalog_feed.csv'
+          commit_message: 'Automated: Update feeds including ChatGPT Ads feed'
           commit_author: 'GitHub Actions <action@github.com>'
