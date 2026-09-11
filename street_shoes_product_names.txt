@@ -1,4 +1,3 @@
-adidas adimatic
 adidas adimule
 adidas adiracer lo
 adidas adistar control 5
@@ -9,9 +8,6 @@ adidas campus 00s wtr lo
 adidas campus 00s wtr md
 adidas campus st
 adidas climacool 1
-adidas falcon
-adidas forum low cl
-adidas forum2000
 adidas gazelle
 adidas gazelle bold
 adidas gazelle indoor
@@ -21,8 +17,6 @@ adidas handball spezial
 adidas handball spezial lo
 adidas handball spezial loafer
 adidas hyperboost euphoria
-adidas jabbar hi
-adidas jabbar lo
 adidas japan
 adidas megaride
 adidas megaride o1
@@ -31,7 +25,6 @@ adidas muenchen
 adidas samba lt
 adidas samba og
 adidas samba xlg
-adidas sambae
 adidas sl 72 og
 adidas sl 72 pro
 adidas sl 72 rs
@@ -65,7 +58,6 @@ air jordan 3 retro og
 air jordan 4 retro
 air jordan 4 retro (gs)
 air jordan 4 rm
-air jordan 4rm
 air jordan 5 retro
 air jordan 5 retro og
 air jordan 6 low
@@ -116,6 +108,7 @@ carhartt wip slippers
 champion low cut shoe z80 desert ash low
 converse as-1 pro ox cliffside
 converse chuck 70
+converse chuck 70 cdg hi
 converse chuck 70 hi
 converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
@@ -140,13 +133,12 @@ dr. martens adrian snaffle black polished smooth
 dr. martens adrian ys
 dr. martens ayce
 dr. martens buzz 5i dark brown grizzly
+dr. martens combs leather
 dr. martens dante
-dr. martens forster mid
 dr. martens josef
 dr. martens lowell
 dr. martens mattison 3s
 dr. martens mattison slide
-dr. martens pearson ii
 dr. martens zebzag mule
 dr. martens zebzag sandal
 dr. martens zebzag slide
@@ -174,10 +166,8 @@ jordan trunner o/s (gs)
 new balance 1000
 new balance 1000d
 new balance 1000g
-new balance 1906
 new balance 1906 loafers
 new balance 1906 utility
-new balance 1906a
 new balance 1906a tech explosion
 new balance 1906e
 new balance 1906f
@@ -191,12 +181,9 @@ new balance 204l
 new balance 509
 new balance 530
 new balance 530 kids bungee lace
-new balance 610
-new balance 650
 new balance 740
 new balance 740 kids bungee lace
 new balance 9060
-new balance 9060 kids hook &amp; loop
 new balance 9060r
 new balance 950
 new balance abzorb 1954r
@@ -208,18 +195,13 @@ new balance abzorb 2010 grey day
 new balance abzorb 5030
 new balance abzorb 5030 grey day
 new balance ct500
-new balance fresh foam trainer
 new balance freshfoam hierro v9 goretex
 new balance gator run s
 new balance m1000
 new balance made in usa 990 v6
 new balance rc56
 new balance t500
-new balance u327
 new balance u9060
-new balance warped runners
-new balance x lunar new year 1906r
-new balance x lunar new year warped runners
 nike af1 shadow
 nike air force 1 flyknit 2.0
 nike air force 1 goretex
@@ -259,12 +241,10 @@ nike air max muse se
 nike air max plus
 nike air max tl 2.5
 nike air more uptempo low
-nike air zoom spiridon sp
 nike ava rover
 nike cortez
 nike cortez lt
 nike dunk low
-nike dunk low (ps)
 nike dunk low goretex
 nike dunk low next nature
 nike dunk low retro
@@ -300,7 +280,6 @@ nike vomero premium
 nike zoom skylon 11
 nike zoom vomero 5
 nike zoom vomero 5 se
-nike zoom vomero roam
 on running cloud 6
 on running cloudhorizon 2
 on running cloudmonster void
@@ -359,6 +338,7 @@ puma velophasis
 puma velophasis 372.5
 puma velophasis always on
 puma velophasis retreat yourself wns
+puma velum 2 sb
 puma x fenty avanti
 reebok club c 85
 saucony progrid guide 7
@@ -387,6 +367,7 @@ vans lx old skool ext
 vans lx sf moc low
 vans old skool
 vans rowley classic
+vans sk8-hi gore-tex insulated mte
 vans sk8-hi tapered
 vans skate loafer
 vans sport low
