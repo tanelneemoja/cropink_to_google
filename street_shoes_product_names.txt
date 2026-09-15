@@ -287,7 +287,6 @@ on running cloudhorizon 2
 on running cloudmonster void
 on running cloudswift amp
 on running cloudtilt remix
-puma a$ap rocky x puma straycat
 puma a$ap rocky x puma suede 94
 puma arizona sd
 puma brasil lth
@@ -364,6 +363,7 @@ vans knu skool
 vans lx authentic 44
 vans lx authentic ease
 vans lx classic slip-on 98
+vans lx half cab reissue 33
 vans lx loafer 53
 vans lx old skool
 vans lx old skool 36
