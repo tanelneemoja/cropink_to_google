@@ -121,6 +121,7 @@ converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
 converse ctas hi x dragon ball z
+converse ctas lift hi
 converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
@@ -156,6 +157,7 @@ jordan cmft era
 jordan flight court
 jordan mvp 92
 jordan mvp 92 (gs)
+jordan session
 jordan sixty plus low
 jordan sixty plus low (gs)
 jordan spizike low
@@ -338,8 +340,6 @@ puma suede xl sunbathers wns
 puma suede xl wild instinct
 puma velophasis
 puma velophasis 372.5
-puma velophasis always on
-puma velophasis retreat yourself wns
 puma velum 2 sb
 puma x fenty avanti
 reebok club c 85
@@ -374,8 +374,6 @@ vans rowley classic
 vans sk8-hi gore-tex insulated mte
 vans sk8-hi tapered
 vans skate loafer
-vans sport low
-vans super lowpro
 vans u old skool
 vans ua authentic
 vans ua classic slip-on
