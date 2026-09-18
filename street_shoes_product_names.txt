@@ -29,6 +29,7 @@ adidas sl 72 og
 adidas sl 72 pro
 adidas sl 72 rs
 adidas superstar ii
+adidas superstar ii anthon
 adidas taekwondo
 adidas taekwondo lace
 adidas terrex free hiker 2 goretex
@@ -372,7 +373,6 @@ vans lx old skool ext
 vans lx sf moc low
 vans old skool
 vans rowley classic
-vans sk8-hi gore-tex insulated mte
 vans sk8-hi tapered
 vans skate loafer
 vans u old skool
