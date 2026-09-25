@@ -117,6 +117,7 @@ converse chuck 70 national ox
 converse chuck 70 national ox branch out
 converse chuck 70 ox
 converse chuck 70 rugged hi
+converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
@@ -150,6 +151,7 @@ hoka u mafate speed 2 ts
 hoka u mafate speed 4 lite
 hoka u mafate three2 wordmark
 hoka u speedgoat 2
+jordan 1 low
 jordan 3 retro (ps)
 jordan 3 retro (td)
 jordan 4 retro (ps)
@@ -291,7 +293,6 @@ on running cloudhorizon 2
 on running cloudmonster void
 on running cloudswift amp
 on running cloudtilt remix
-puma a$ap rocky x puma suede 94
 puma arizona sd
 puma brasil lth
 puma creeper phatty
