@@ -108,9 +108,11 @@ birkenstock florida sfb bfbc mocca
 birkenstock zermatt premium shearling leve mink laf
 carhartt wip slippers
 champion low cut shoe z80 desert ash low
+converse as-1 pro ox
 converse as-1 pro ox cliffside
 converse chuck 70
 converse chuck 70 cdg hi
+converse chuck 70 gtx hi
 converse chuck 70 hi
 converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
@@ -189,6 +191,8 @@ new balance 740 kids bungee lace
 new balance 9060
 new balance 9060r
 new balance 950
+new balance 983
+new balance abzorb 1890
 new balance abzorb 1954r
 new balance abzorb 2000
 new balance abzorb 2000 grey day
@@ -247,7 +251,6 @@ nike air max tl 2.5
 nike ava rover
 nike cortez
 nike cortez lt
-nike dunk hi retro
 nike dunk low
 nike dunk low goretex
 nike dunk low next nature
@@ -348,7 +351,10 @@ saucony ride millennium
 the north face glenclyffe mule
 the north face glenclyffe zip gore-tex
 ugg lowmel
+ugg tasman ii
 ugg tasman nubuck
+ugg tasman western
+ugg tazz ii
 vans 2-eyelet boat shoe
 vans authentic
 vans authentic creeper
