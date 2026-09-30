@@ -25,6 +25,7 @@ adidas muenchen
 adidas samba lt
 adidas samba og
 adidas samba xlg
+adidas sambae
 adidas sl 72 og
 adidas sl 72 pro
 adidas sl 72 rs
@@ -372,7 +373,6 @@ vans lx old skool 36
 vans lx old skool ext
 vans lx sf moc low
 vans old skool
-vans old skool insulated
 vans rowley classic
 vans sk8-hi tapered
 vans skate loafer
