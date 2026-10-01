@@ -197,6 +197,7 @@ new balance abzorb 1890
 new balance abzorb 1954r
 new balance abzorb 2000
 new balance abzorb 2000 grey day
+new balance abzorb 2000l
 new balance abzorb 2000s
 new balance abzorb 2010
 new balance abzorb 2010 grey day
