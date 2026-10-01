@@ -125,9 +125,11 @@ converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
 converse ctas hi x dragon ball z
+converse ctas lift hi
 converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
+converse omega trainer se ox
 converse one star pro ox
 converse run star crush ox
 converse run star trainer
@@ -343,6 +345,7 @@ puma suede xl sunbathers wns
 puma suede xl wild instinct
 puma velophasis
 puma velophasis 372.5
+puma velophasis always on
 puma velum 2 sb
 puma x fenty avanti
 reebok club c 85
