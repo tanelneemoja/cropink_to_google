@@ -25,7 +25,6 @@ adidas muenchen
 adidas samba lt
 adidas samba og
 adidas samba xlg
-adidas sambae
 adidas sl 72 og
 adidas sl 72 pro
 adidas sl 72 rs
@@ -269,6 +268,7 @@ nike shox z
 nike shox z lace
 nike sprint sister
 nike t90 se
+nike t90 sp
 nike v5 rnr
 nike vomero plus
 nike vomero plus se
