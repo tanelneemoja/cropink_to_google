@@ -115,12 +115,10 @@ converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
 converse chuck 70 ox
 converse chuck 70 rugged hi
-converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
 converse ctas hi x dragon ball z
-converse ctas lift hi
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
 converse omega trainer se ox
@@ -268,6 +266,7 @@ nike shox z
 nike shox z lace
 nike sprint sister
 nike t90 se
+nike t90 sp
 nike v5 rnr
 nike vomero plus
 nike vomero plus se
