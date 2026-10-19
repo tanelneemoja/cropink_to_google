@@ -18,7 +18,6 @@ adidas handball spezial loafer
 adidas hyperboost euphoria
 adidas japan
 adidas megaride
-adidas megaride o1
 adidas montreal rm
 adidas muenchen
 adidas samba lt
@@ -31,10 +30,8 @@ adidas superstar ii
 adidas superstar ii anthony edwards
 adidas taekwondo
 adidas taekwondo lace
-adidas terrex free hiker 2 goretex
 adidas tokyo
 air jordan 1 element low a/t
-air jordan 1 high og
 air jordan 1 low
 air jordan 1 low (gs)
 air jordan 1 low se
@@ -51,6 +48,7 @@ air jordan 1 triple stack
 air jordan 11 retro low
 air jordan 12 retro
 air jordan 13 retro
+air jordan 13 retro flint
 air jordan 3 retro
 air jordan 3 retro (gs)
 air jordan 3 retro laser
@@ -117,10 +115,12 @@ converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
 converse chuck 70 ox
 converse chuck 70 rugged hi
+converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
 converse ctas hi x dragon ball z
+converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
 converse one star pro ox
@@ -204,7 +204,6 @@ new balance freshfoam hierro v9 goretex
 new balance gator run
 new balance gator run s
 new balance m1000
-new balance made in usa 990 v6
 new balance rc56
 new balance t500
 new balance u9060
@@ -281,7 +280,6 @@ on running cloud 6
 on running cloud 6 geo waterproof
 on running cloudhorizon 2
 on running cloudmonster void
-on running cloudswift amp
 puma arizona sd
 puma brasil lth
 puma creeper phatty
