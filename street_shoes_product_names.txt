@@ -121,7 +121,6 @@ converse chuck 70 hi x dragon ball z
 converse chuck 70 national ox
 converse chuck 70 ox
 converse chuck 70 rugged hi
-converse cl98 ox
 converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
@@ -237,7 +236,6 @@ nike air force 1 ´07 low crsnt
 nike air force 1 ´07 lv8
 nike air force 1 ´07 lv8 ess+
 nike air force 1 ´07 lx vibram
-nike air force 1 ´07 prm
 nike air force 1 ´07 se hrdwr
 nike air force 1 ´07 wb
 nike air liquid max
@@ -279,6 +277,7 @@ nike p-6000 se los
 nike pegasus premium
 nike pegasus premium se
 nike reactx rejuven8
+nike sb dunk low pro
 nike shox r4
 nike shox ride 2
 nike shox tl
@@ -287,7 +286,9 @@ nike shox z
 nike shox z lace
 nike sprint sister
 nike t90 se
+nike t90 sp
 nike v5 rnr
+nike vomero 18 goretex
 nike vomero plus
 nike vomero plus se
 nike vomero premium
