@@ -16,6 +16,7 @@ adidas gazelle stack
 adidas handball spezial
 adidas handball spezial lo
 adidas handball spezial loafer
+adidas handball spezial wtr
 adidas hyperboost euphoria
 adidas japan
 adidas megaride
@@ -138,7 +139,6 @@ dr. martens adrian
 dr. martens adrian croc
 dr. martens adrian snaffle black polished smooth
 dr. martens buzz 5i dark brown grizzly
-dr. martens combs leather
 dr. martens josef
 dr. martens lowell
 dr. martens mattison 3s
@@ -171,10 +171,13 @@ jordan trunner o/s (gs)
 merrell agility peak 6
 merrell agility peak 6 boa
 merrell agility peak 6 gtx
+merrell moab speed 2 gtx
 merrell moab speed 2 sport
 merrell promorph
 merrell promorph comet
 merrell speedarc matis
+merrell speedarc matis gtx
+merrell speedarc matis ltr wp
 new balance 1000
 new balance 1000d
 new balance 1000g
@@ -394,3 +397,4 @@ vans ua authentic
 vans ua classic slip-on
 vans ua old skool
 vans ultrarange neo vr3
+veja campo suede
