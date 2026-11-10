@@ -124,6 +124,7 @@ converse ct lo ox
 converse ct throwback hi
 converse ct throwback ox
 converse ctas hi x dragon ball z
+converse ctas lugged heel loafer ox
 converse louie lopez pro 2
 converse louie lopez pro 2 ox
 converse one star pro ox
@@ -386,7 +387,6 @@ vans lx old skool ext
 vans lx sf moc low
 vans old skool
 vans rowley classic
-vans sk8-hi gore-tex insulated mte
 vans sk8-hi tapered
 vans skate loafer
 vans u old skool
