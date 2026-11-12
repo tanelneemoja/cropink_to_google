@@ -12,6 +12,7 @@ adidas gazelle
 adidas gazelle bold
 adidas gazelle indoor
 adidas gazelle lo pro
+adidas gazelle stack
 adidas handball spezial
 adidas handball spezial lo
 adidas handball spezial loafer
@@ -292,7 +293,6 @@ nike sprint sister
 nike t90 se
 nike t90 sp
 nike v5 rnr
-nike vomero 18 goretex
 nike vomero plus
 nike vomero plus se
 nike vomero premium
@@ -335,7 +335,6 @@ puma rebound abrupt
 puma rs surge
 puma rs surge hairy suede
 puma rs surge lakeshore
-puma rx 737 vintage
 puma speedcat cat wns
 puma speedcat cow wns
 puma speedcat elevated wns
