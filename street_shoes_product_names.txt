@@ -153,6 +153,8 @@ jordan 3 retro (ps)
 jordan 3 retro (td)
 jordan 4 retro (ps)
 jordan 4 retro (td)
+jordan 6 retro low (td)
+jordan 6 retro low fem gp
 jordan cmft era
 jordan flight court
 jordan mvp 92
@@ -232,6 +234,7 @@ nike air force 1 gtx
 nike air force 1 gtx vibram
 nike air force 1 le
 nike air force 1 lo
+nike air force 1 low retro
 nike air force 1 mid ´07
 nike air force 1 retro prm
 nike air force 1 ´07
@@ -240,7 +243,9 @@ nike air force 1 ´07 low crsnt
 nike air force 1 ´07 lv8
 nike air force 1 ´07 lv8 ess+
 nike air force 1 ´07 lx vibram
+nike air force 1 ´07 se
 nike air force 1 ´07 se hrdwr
+nike air force 1 ´07 se velvet
 nike air force 1 ´07 wb
 nike air liquid max
 nike air max 90
@@ -267,6 +272,7 @@ nike cortez lt
 nike dunk low
 nike dunk low gore-tex
 nike dunk low goretex
+nike dunk low gtx
 nike dunk low retro
 nike dunk low retro prm
 nike dunk low retro se
