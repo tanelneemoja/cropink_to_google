@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 import pandas as pd
 import requests
-
+ 
 DEFAULT_CROPINK_FEED_URL = (
     "https://backend.ballzy.eu/et/amfeed/feed/download"
     "?id=102&file=cropink_et.xml"
